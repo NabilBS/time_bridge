@@ -43,3 +43,12 @@ Ziel: Nutzer B kann den Pfad von Nutzer A weder lesen noch beschreiben.
 ```
 
 Erwartung: (1) und (2) schlagen fehl, (3) gelingt. Ergebnis im PR dokumentieren, bevor der Prüfprozess startet.
+
+## Matching-Negativtests (gegen eine echte Instanz auszuführen)
+
+1. **Absender kann nicht selbst annehmen:** Als Absender `update match_requests set status = 'accepted' where id = …` → muss an RLS scheitern (0 Zeilen). Auch `accept_match_request(<id>)` als Absender → Exception „Nur die empfangende Person …".
+2. **Dritter sieht/ändert fremde Anfragen nicht:** Als unbeteiligter Nutzer C `select`/`update` auf eine Anfrage zwischen A und B → leeres Ergebnis bzw. 0 Zeilen.
+3. **Realtime respektiert RLS:** Nutzer C abonniert `postgres_changes` auf `messages` mit `match_id=eq.<Match von A/B>` → C darf beim Senden von A nach B **kein** Event erhalten.
+4. **Gesperrtes Profil:** `is_active = false` beim Empfänger → neue Anfrage scheitert (Insert-Policy), `accept_match_request` wirft „Dieses Profil ist nicht mehr aktiv."
+
+Ergebnisse im PR dokumentieren.
