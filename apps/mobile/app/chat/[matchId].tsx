@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DemoBanner } from "@/components/DemoBanner";
+import { formatDateTime, isPast } from "@/lib/datetime";
 import {
   loadMatchHeader,
   loadMessages,
@@ -21,6 +22,13 @@ import {
   subscribeToMessages,
   type ChatMessage,
 } from "@/lib/matching";
+import {
+  cancelMeeting,
+  completeMeeting,
+  hasReviewed,
+  loadMeetings,
+  type MeetingItem,
+} from "@/lib/meetings";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function Chat() {
@@ -33,6 +41,8 @@ export default function Chat() {
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [partnerActive, setPartnerActive] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [meetings, setMeetings] = useState<MeetingItem[]>([]);
+  const [reviewed, setReviewed] = useState<Record<string, boolean>>({});
   const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +53,22 @@ export default function Chat() {
       current.some((entry) => entry.id === message.id) ? current : [...current, message],
     );
   }, []);
+
+  const reloadMeetings = useCallback(async () => {
+    if (!matchId) return;
+    try {
+      const list = await loadMeetings(matchId);
+      setMeetings(list);
+      const reviewedEntries = await Promise.all(
+        list
+          .filter((m) => m.status === "completed")
+          .map(async (m) => [m.id, await hasReviewed(m.id)] as const),
+      );
+      setReviewed(Object.fromEntries(reviewedEntries));
+    } catch {
+      /* Treffen sind nicht kritisch fürs Chatten */
+    }
+  }, [matchId]);
 
   useEffect(() => {
     if (!matchId) return;
@@ -68,12 +94,18 @@ export default function Chat() {
     };
   }, [matchId, appendMessage]);
 
+  // Treffen neu laden, sobald der Chat wieder im Fokus ist (nach Planen/Bewerten).
+  useFocusEffect(
+    useCallback(() => {
+      reloadMeetings();
+    }, [reloadMeetings]),
+  );
+
   async function handleSend() {
     if (!matchId || !selfId) return;
     const body = draft.trim();
     if (!body) return;
 
-    // Optimistisch anzeigen, bei Fehler zurückrollen.
     const temporaryId = `pending-${Date.now()}`;
     const optimistic: ChatMessage = {
       id: temporaryId,
@@ -89,14 +121,9 @@ export default function Chat() {
 
     try {
       const saved = await sendChatMessage(matchId, body);
-      setMessages((current) =>
-        current.map((entry) => (entry.id === temporaryId ? saved : entry)),
-      );
-      if (matchId) {
-        // Demo: feste Antwort des Gegenübers nachladen
-        const refreshed = await loadMessages(matchId);
-        setMessages((current) => (refreshed.length > current.length ? refreshed : current));
-      }
+      setMessages((current) => current.map((entry) => (entry.id === temporaryId ? saved : entry)));
+      const refreshed = await loadMessages(matchId);
+      setMessages((current) => (refreshed.length > current.length ? refreshed : current));
     } catch {
       setMessages((current) => current.filter((entry) => entry.id !== temporaryId));
       setDraft(body);
@@ -106,11 +133,87 @@ export default function Chat() {
     }
   }
 
+  async function handleMeetingAction(action: () => Promise<void>) {
+    try {
+      await action();
+      await reloadMeetings();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : OFFLINE_MESSAGE);
+    }
+  }
+
   if (!matchId) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <Text style={styles.errorText}>Dieser Chat wurde nicht gefunden.</Text>
       </SafeAreaView>
+    );
+  }
+
+  function renderMeetings() {
+    return (
+      <View style={styles.meetingsHeader}>
+        <View style={styles.tipBanner}>
+          <Text style={styles.tipText}>
+            Tipp: Verabreden Sie Ihr erstes Treffen an einem Partner-Ort in Ihrer Nähe.
+          </Text>
+        </View>
+        {partnerActive ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/treffen/planen/${matchId}`)}
+            style={({ pressed }) => [styles.planButton, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={styles.planButtonLabel}>+ Treffen planen</Text>
+          </Pressable>
+        ) : null}
+        {meetings.map((meeting) => (
+          <View key={meeting.id} style={styles.meetingCard}>
+            <Text style={styles.meetingWhen}>{formatDateTime(meeting.scheduled_at)}</Text>
+            <Text style={styles.meetingWhere}>
+              {meeting.locationName ?? "Ort wird noch festgelegt"}
+            </Text>
+            {meeting.status === "cancelled" ? (
+              <Text style={styles.meetingCancelled}>Das Treffen wurde abgesagt.</Text>
+            ) : meeting.status === "completed" ? (
+              reviewed[meeting.id] ? (
+                <Text style={styles.meetingDone}>Bewertet – vielen Dank!</Text>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() =>
+                    router.push(
+                      `/treffen/bewerten/${meeting.id}?reviewedId=${partnerId ?? ""}`,
+                    )
+                  }
+                  style={styles.meetingAction}
+                >
+                  <Text style={styles.meetingActionLabel}>Treffen bewerten</Text>
+                </Pressable>
+              )
+            ) : (
+              <View style={styles.meetingActions}>
+                {isPast(meeting.scheduled_at) ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => handleMeetingAction(() => completeMeeting(meeting.id))}
+                    style={styles.meetingAction}
+                  >
+                    <Text style={styles.meetingActionLabel}>Hat stattgefunden</Text>
+                  </Pressable>
+                ) : null}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => handleMeetingAction(() => cancelMeeting(meeting.id))}
+                  style={styles.meetingAction}
+                >
+                  <Text style={[styles.meetingActionLabel, { color: colors.error }]}>Absagen</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        ))}
+      </View>
     );
   }
 
@@ -144,11 +247,6 @@ export default function Chat() {
         </View>
 
         <DemoBanner />
-        <View style={styles.tipBanner}>
-          <Text style={styles.tipText}>
-            Tipp: Verabreden Sie Ihr erstes Treffen an einem Partner-Ort in Ihrer Nähe.
-          </Text>
-        </View>
         {!partnerActive ? (
           <View style={styles.inactiveBanner}>
             <Text style={styles.inactiveText}>Dieses Profil ist nicht mehr aktiv.</Text>
@@ -160,6 +258,7 @@ export default function Chat() {
           data={messages}
           keyExtractor={(message) => message.id}
           contentContainerStyle={styles.messageList}
+          ListHeaderComponent={renderMeetings()}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           renderItem={({ item: message }) => {
             const own = message.sender_profile === selfId;
@@ -172,9 +271,7 @@ export default function Chat() {
                   pending && { opacity: 0.6 },
                 ]}
               >
-                <Text style={[styles.bubbleText, own && styles.bubbleTextOwn]}>
-                  {message.body}
-                </Text>
+                <Text style={[styles.bubbleText, own && styles.bubbleTextOwn]}>{message.body}</Text>
               </View>
             );
           }}
@@ -188,9 +285,7 @@ export default function Chat() {
             style={[styles.input, !partnerActive && { opacity: 0.5 }]}
             value={draft}
             onChangeText={setDraft}
-            placeholder={
-              partnerActive ? "Ihre Nachricht …" : "Dieses Profil ist nicht mehr aktiv."
-            }
+            placeholder={partnerActive ? "Ihre Nachricht …" : "Dieses Profil ist nicht mehr aktiv."}
             placeholderTextColor={colors.textMuted}
             multiline
             maxLength={2000}
@@ -201,10 +296,7 @@ export default function Chat() {
             accessibilityLabel="Senden"
             onPress={handleSend}
             disabled={!partnerActive || !draft.trim()}
-            style={[
-              styles.sendButton,
-              (!partnerActive || !draft.trim()) && { opacity: 0.4 },
-            ]}
+            style={[styles.sendButton, (!partnerActive || !draft.trim()) && { opacity: 0.4 }]}
           >
             <Text style={styles.sendLabel}>Senden</Text>
           </Pressable>
@@ -252,17 +344,6 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontWeight: "600",
   },
-  tipBanner: {
-    backgroundColor: colors.primarySoft,
-    marginHorizontal: spacing.md,
-    borderRadius: radius.sm,
-    padding: spacing.sm,
-  },
-  tipText: {
-    fontSize: fontSize.body,
-    color: colors.text,
-    textAlign: "center",
-  },
   inactiveBanner: {
     backgroundColor: colors.errorSoft,
     marginHorizontal: spacing.md,
@@ -276,11 +357,77 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "600",
   },
+  meetingsHeader: {
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
+  },
+  tipBanner: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.sm,
+    padding: spacing.sm,
+  },
+  tipText: {
+    fontSize: fontSize.body,
+    color: colors.text,
+    textAlign: "center",
+  },
+  planButton: {
+    minHeight: touchTarget.minHeight,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  planButtonLabel: {
+    fontSize: fontSize.body,
+    fontWeight: "700",
+    color: colors.primary,
+  },
+  meetingCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  meetingWhen: {
+    fontSize: fontSize.bodyLarge,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  meetingWhere: {
+    fontSize: fontSize.body,
+    color: colors.textMuted,
+  },
+  meetingCancelled: {
+    fontSize: fontSize.body,
+    color: colors.error,
+  },
+  meetingDone: {
+    fontSize: fontSize.body,
+    color: colors.primary,
+    fontWeight: "600",
+  },
+  meetingActions: {
+    flexDirection: "row",
+    gap: spacing.md,
+    marginTop: spacing.xs,
+  },
+  meetingAction: {
+    minHeight: touchTarget.minHeight,
+    justifyContent: "center",
+  },
+  meetingActionLabel: {
+    fontSize: fontSize.body,
+    fontWeight: "700",
+    color: colors.primary,
+  },
   messageList: {
     padding: spacing.md,
     gap: spacing.sm,
     flexGrow: 1,
-    justifyContent: "flex-end",
   },
   bubble: {
     maxWidth: "85%",

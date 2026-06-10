@@ -1,4 +1,4 @@
-import { BERLIN_DISTRICTS } from "@zeitbruecke/shared";
+import { BERLIN_DISTRICTS, PARTNER_KIND_LABELS } from "@zeitbruecke/shared";
 
 import type { PartnerLocationRow } from "@/lib/types";
 
@@ -13,20 +13,39 @@ export function PartnerLocationFields({ location }: { location?: PartnerLocation
 
       <div className="form-row">
         <label htmlFor="kind">Art *</label>
+        <select id="kind" name="kind" required defaultValue={location?.kind ?? ""}>
+          <option value="" disabled>
+            Bitte wählen …
+          </option>
+          {Object.entries(PARTNER_KIND_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-row">
+        <label htmlFor="street">Straße und Hausnummer</label>
         <input
-          id="kind"
-          name="kind"
+          id="street"
+          name="street"
           type="text"
-          required
-          maxLength={80}
-          placeholder="z. B. Mehrgenerationenhaus, Stadtteilzentrum"
-          defaultValue={location?.kind ?? ""}
+          maxLength={200}
+          defaultValue={location?.street ?? ""}
         />
       </div>
 
       <div className="form-row">
-        <label htmlFor="address">Adresse *</label>
-        <input id="address" name="address" type="text" required maxLength={200} defaultValue={location?.address ?? ""} />
+        <label htmlFor="postal_code">Postleitzahl</label>
+        <input
+          id="postal_code"
+          name="postal_code"
+          type="text"
+          inputMode="numeric"
+          maxLength={5}
+          defaultValue={location?.postal_code ?? ""}
+        />
       </div>
 
       <div className="form-row">
@@ -44,26 +63,26 @@ export function PartnerLocationFields({ location }: { location?: PartnerLocation
       </div>
 
       <div className="form-row">
-        <label htmlFor="latitude">Breitengrad (Latitude)</label>
+        <label htmlFor="lat">Breitengrad</label>
         <input
-          id="latitude"
-          name="latitude"
+          id="lat"
+          name="lat"
           type="text"
           inputMode="decimal"
           placeholder="z. B. 52.5200"
-          defaultValue={location?.latitude ?? ""}
+          defaultValue={location?.lat ?? ""}
         />
       </div>
 
       <div className="form-row">
-        <label htmlFor="longitude">Längengrad (Longitude)</label>
+        <label htmlFor="lng">Längengrad</label>
         <input
-          id="longitude"
-          name="longitude"
+          id="lng"
+          name="lng"
           type="text"
           inputMode="decimal"
           placeholder="z. B. 13.4050"
-          defaultValue={location?.longitude ?? ""}
+          defaultValue={location?.lng ?? ""}
         />
       </div>
 

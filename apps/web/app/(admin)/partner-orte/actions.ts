@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { BERLIN_DISTRICTS } from "@zeitbruecke/shared";
+import { BERLIN_DISTRICTS, PartnerKind } from "@zeitbruecke/shared";
 
 import { audit } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth";
@@ -32,21 +32,26 @@ const PartnerLocationInputSchema = z.object({
     .trim()
     .min(1, "Bitte geben Sie einen Namen an.")
     .max(120, "Der Name darf höchstens 120 Zeichen lang sein."),
-  kind: z
+  kind: z.enum(PartnerKind.options, {
+    errorMap: () => ({ message: "Bitte wählen Sie die Art des Ortes." }),
+  }),
+  street: z
     .string()
     .trim()
-    .min(1, "Bitte geben Sie die Art des Ortes an (z. B. Mehrgenerationenhaus).")
-    .max(80, "Die Art darf höchstens 80 Zeichen lang sein."),
-  address: z
+    .max(200, "Die Straße darf höchstens 200 Zeichen lang sein.")
+    .transform((value) => (value === "" ? null : value)),
+  postal_code: z
     .string()
     .trim()
-    .min(1, "Bitte geben Sie eine Adresse an.")
-    .max(200, "Die Adresse darf höchstens 200 Zeichen lang sein."),
+    .transform((value) => (value === "" ? null : value))
+    .refine((value) => value === null || /^\d{5}$/.test(value), {
+      message: "Bitte geben Sie eine fünfstellige Postleitzahl an.",
+    }),
   district: z.enum(BERLIN_DISTRICTS, {
     errorMap: () => ({ message: "Bitte wählen Sie einen Bezirk." }),
   }),
-  latitude: optionalCoordinate(-90, 90),
-  longitude: optionalCoordinate(-180, 180),
+  lat: optionalCoordinate(-90, 90),
+  lng: optionalCoordinate(-180, 180),
   contact: z
     .string()
     .trim()
@@ -61,10 +66,11 @@ function parseInput(formData: FormData) {
   return PartnerLocationInputSchema.safeParse({
     name: formString(formData, "name"),
     kind: formString(formData, "kind"),
-    address: formString(formData, "address"),
+    street: formString(formData, "street"),
+    postal_code: formString(formData, "postal_code"),
     district: formString(formData, "district"),
-    latitude: formString(formData, "latitude"),
-    longitude: formString(formData, "longitude"),
+    lat: formString(formData, "lat"),
+    lng: formString(formData, "lng"),
     contact: formString(formData, "contact"),
     is_verified: formData.get("is_verified") === "on",
   });

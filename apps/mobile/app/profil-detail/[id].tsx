@@ -21,6 +21,7 @@ import {
   sendMatchRequest,
   type DiscoverProfile,
 } from "@/lib/matching";
+import { loadReviewStats, type ReviewStats } from "@/lib/meetings";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function ProfileDetail() {
@@ -33,6 +34,7 @@ export default function ProfileDetail() {
     { weekday: number; time_from: string; time_to: string }[]
   >([]);
   const [requestStatus, setRequestStatus] = useState<MatchRequestStatus | null>(null);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -43,13 +45,15 @@ export default function ProfileDetail() {
   const load = useCallback(async () => {
     if (!profileId) return;
     try {
-      const [detail, status] = await Promise.all([
+      const [detail, status, stats] = await Promise.all([
         loadProfileDetail(profileId),
         existingRequestTo(profileId),
+        loadReviewStats(profileId).catch(() => ({ count: 0, avg: null }) as ReviewStats),
       ]);
       setProfile(detail.profile);
       setAvailability(detail.availability);
       setRequestStatus(status);
+      setReviewStats(stats);
       setLoadError(null);
     } catch (caught) {
       setLoadError(caught instanceof Error ? caught.message : OFFLINE_MESSAGE);
@@ -102,6 +106,13 @@ export default function ProfileDetail() {
       <DemoBanner />
       <Title>{profile.display_name}</Title>
       <TrustBadge level={profile.trust_level} />
+      <Text style={styles.reviewLine}>
+        {reviewStats && reviewStats.count > 0 && reviewStats.avg != null
+          ? `⌀ ${reviewStats.avg.toFixed(1).replace(".", ",")} von 5 · ${reviewStats.count} ${
+              reviewStats.count === 1 ? "Treffen" : "Treffen"
+            }`
+          : "Noch keine Treffen über Zeitbrücke"}
+      </Text>
       <BodyText muted>
         {profile.role === "senior" ? "Möchte Zeit schenken" : "Sucht Unterstützung"} ·{" "}
         {profile.district}
@@ -190,6 +201,10 @@ const styles = StyleSheet.create({
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
     fontWeight: "600",
+  },
+  reviewLine: {
+    fontSize: fontSize.body,
+    color: colors.textMuted,
   },
   section: {
     gap: spacing.xs,

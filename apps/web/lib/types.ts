@@ -1,5 +1,6 @@
 import type {
   BerlinDistrict,
+  PartnerKind,
   Role,
   VerificationStatus,
   VerificationType,
@@ -51,11 +52,12 @@ export interface ReportRow {
 export interface PartnerLocationRow {
   id: string;
   name: string;
-  kind: string;
-  address: string;
+  kind: PartnerKind;
+  street: string | null;
+  postal_code: string | null;
   district: BerlinDistrict | string;
-  latitude: number | null;
-  longitude: number | null;
+  lat: number | null;
+  lng: number | null;
   contact: string | null;
   is_verified: boolean;
   created_at: string;

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PARTNER_KIND_LABELS } from "@zeitbruecke/shared";
+
 import { formatDate } from "@/lib/dates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PartnerLocationRow } from "@/lib/types";
@@ -46,9 +48,12 @@ export default async function PartnerOrtePage() {
             {rows.map((row) => (
               <tr key={row.id}>
                 <td>{row.name}</td>
-                <td>{row.kind}</td>
+                <td>{PARTNER_KIND_LABELS[row.kind]}</td>
                 <td>{row.district}</td>
-                <td>{row.address}</td>
+                <td>
+                  {row.street}
+                  {row.postal_code ? ` (${row.postal_code})` : ""}
+                </td>
                 <td>
                   {row.is_verified ? (
                     <span className="badge badge-verified">Ja</span>

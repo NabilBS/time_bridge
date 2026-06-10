@@ -52,3 +52,26 @@ Erwartung: (1) und (2) schlagen fehl, (3) gelingt. Ergebnis im PR dokumentieren,
 4. **Gesperrtes Profil:** `is_active = false` beim Empfänger → neue Anfrage scheitert (Insert-Policy), `accept_match_request` wirft „Dieses Profil ist nicht mehr aktiv."
 
 Ergebnisse im PR dokumentieren.
+
+## Treffen & Bewertungen (Auftrag 005)
+
+- **Ersttreffen-Pflicht:** Trigger `enforce_first_meeting_location` verlangt beim ersten `meetings`-Insert eines Matches (kein vorhandenes planned/completed) eine gesetzte, **verifizierte** `partner_location_id`. Folgetreffen sind frei.
+- **Bewertungen:** `review_write` erlaubt Insert nur für Match-Mitglieder und nur bei `status = 'completed'`; genau eine Bewertung je Person und Treffen (Unique-Index). `review_read` nur für Match-Mitglieder – Einzelkommentare sind nicht öffentlich.
+- **Aggregate:** ausschließlich über `review_stats(p_profile)` (security definer), nie per Join.
+- **Seed:** `supabase/seed.sql` legt 5 Platzhalter-Partner-Orte an (`supabase db reset` spielt sie ein).
+
+### Negativtests Treffen/Bewertungen
+1. Erstes Treffen ohne `partner_location_id` oder mit nicht-verifiziertem Ort → Insert wirft „Das erste Treffen findet an einem Partner-Ort statt."; Folgetreffen ohne Ort → erlaubt.
+2. Bewertung durch Dritte oder vor `completed` → RLS lehnt ab; zweite Bewertung derselben Person → Unique-Verletzung.
+3. `review_stats` liefert korrektes Aggregat; Einzelkommentare fremder Matches sind via `select` nicht abrufbar.
+
+## Benachrichtigungen (Auftrag 006)
+
+- **Outbox:** `notification_outbox` ist rein intern (RLS aktiv, keine Policy ⇒ nur Service-Role). Trigger befüllen sie mit **nur IDs + Anzeigename**, nie Nachrichtentext/Dokumentdaten. Opt-out je Kategorie (`notification_prefs`) verhindert den Eintrag bereits im Trigger (`notif_enabled`).
+- **Treffen-Erinnerung:** stündlicher pg_cron-Job, 23–24 h vor `scheduled_at`, dedupliziert über Unique-Index `(recipient_id, payload->>'meeting_id')`.
+- **Edge Function `process-outbox`:** per Cron-Trigger jede Minute. Claim über `claim_outbox_batch` (`for update skip locked` ⇒ kein Doppelversand bei parallelen Läufen), Expo Push API, `sent_at` setzen, bei Fehler `attempts + 1`, ab 5 Versuchen verworfen; `DeviceNotRegistered` → Token löschen.
+  - Deploy: `supabase functions deploy process-outbox`; Cron-Trigger (z. B. via `pg_cron` + `net.http_post` oder Dashboard-Schedule) jede Minute auf die Function-URL.
+- **Payload-Inspektion:** `select kind, payload from notification_outbox` enthält nie `body`/Dokumentinhalte.
+
+### RLS-Negativtest Benachrichtigungen
+Nutzer B darf weder `push_tokens` noch `notification_outbox`-Zeilen von Nutzer A sehen: `select` als B auf fremde Zeilen → leer (Outbox: gar keine Policy, push_tokens: nur eigene).

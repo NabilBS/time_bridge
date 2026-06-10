@@ -179,14 +179,24 @@ create policy "reports_select_own" on public.reports
   for select to authenticated using (reporter_profile = auth.uid());
 
 -- Partner-Orte: gepflegt über Service-Role; in der App nur verifizierte sichtbar.
+create type public.partner_kind as enum (
+  'mehrgenerationenhaus',
+  'stadtteilzentrum',
+  'familienzentrum',
+  'bibliothek',
+  'nachbarschaftstreff',
+  'gemeindezentrum'
+);
+
 create table public.partner_locations (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  kind text not null,
-  address text not null,
+  kind public.partner_kind not null,
+  street text,
+  postal_code text,
   district text not null,
-  latitude double precision,
-  longitude double precision,
+  lat double precision,
+  lng double precision,
   contact text,
   is_verified boolean not null default false,
   created_at timestamptz not null default now()

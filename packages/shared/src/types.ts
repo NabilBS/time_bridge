@@ -96,3 +96,107 @@ export const REPORT_REASONS = [
   { id: "other", label: "Etwas anderes" },
 ] as const;
 export type ReportReasonId = (typeof REPORT_REASONS)[number]["id"];
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 005 – Treffen am Partner-Ort & Bewertungen                  */
+/* ------------------------------------------------------------------ */
+
+export const PartnerKind = z.enum([
+  "mehrgenerationenhaus",
+  "stadtteilzentrum",
+  "familienzentrum",
+  "bibliothek",
+  "nachbarschaftstreff",
+  "gemeindezentrum",
+]);
+export type PartnerKind = z.infer<typeof PartnerKind>;
+
+export const PARTNER_KIND_LABELS: Record<PartnerKind, string> = {
+  mehrgenerationenhaus: "Mehrgenerationenhaus",
+  stadtteilzentrum: "Stadtteilzentrum",
+  familienzentrum: "Familienzentrum",
+  bibliothek: "Bibliothek",
+  nachbarschaftstreff: "Nachbarschaftstreff",
+  gemeindezentrum: "Gemeindezentrum",
+};
+
+export const MeetingStatus = z.enum(["planned", "completed", "cancelled"]);
+export type MeetingStatus = z.infer<typeof MeetingStatus>;
+
+export const MeetingSchema = z.object({
+  id: z.string().uuid(),
+  match_id: z.string().uuid(),
+  partner_location_id: z.string().uuid().nullable(),
+  scheduled_at: z.string(),
+  status: MeetingStatus,
+  created_at: z.string(),
+});
+export type Meeting = z.infer<typeof MeetingSchema>;
+
+export const PartnerLocationSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  kind: PartnerKind,
+  street: z.string().nullable(),
+  postal_code: z.string().nullable(),
+  district: z.string().nullable(),
+  lat: z.number().nullable(),
+  lng: z.number().nullable(),
+  is_verified: z.boolean(),
+});
+export type PartnerLocation = z.infer<typeof PartnerLocationSchema>;
+
+export const ReviewSchema = z.object({
+  id: z.string().uuid(),
+  meeting_id: z.string().uuid(),
+  reviewer_id: z.string().uuid(),
+  stars: z.number().int().min(1).max(5),
+  comment: z.string().max(600).nullable(),
+  created_at: z.string(),
+});
+export type Review = z.infer<typeof ReviewSchema>;
+
+/** Aggregierte Bewertungen eines Profils – nur über diese RPC, nie per Join. */
+export const RPC_REVIEW_STATS = "review_stats";
+
+export const CreateReviewSchema = z.object({
+  meeting_id: z.string().uuid(),
+  stars: z.number().int().min(1, "Bitte vergeben Sie mindestens einen Stern.").max(5),
+  comment: z
+    .string()
+    .trim()
+    .max(600, "Ihr Kommentar darf höchstens 600 Zeichen lang sein.")
+    .nullable(),
+});
+export type CreateReview = z.infer<typeof CreateReviewSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 006 – Benachrichtigungen                                    */
+/* ------------------------------------------------------------------ */
+
+export const NotificationKind = z.enum([
+  "request_received", // Neue Anfrage
+  "request_accepted", // Anfrage angenommen → Chat offen
+  "message_received", // Neue Nachricht (ohne Inhalt!)
+  "verification_decided", // approved / rejected / expired
+  "meeting_reminder", // 24 h vor scheduled_at
+]);
+export type NotificationKind = z.infer<typeof NotificationKind>;
+
+/** Schalter je Kategorie; fehlender Schlüssel = an. */
+export const NotificationPrefsSchema = z.object({
+  request_received: z.boolean().optional(),
+  request_accepted: z.boolean().optional(),
+  message_received: z.boolean().optional(),
+  verification_decided: z.boolean().optional(),
+  meeting_reminder: z.boolean().optional(),
+});
+export type NotificationPrefs = z.infer<typeof NotificationPrefsSchema>;
+
+export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationKind, string> = {
+  request_received: "Neue Anfragen",
+  request_accepted: "Angenommene Anfragen",
+  message_received: "Neue Nachrichten",
+  verification_decided: "Entscheidungen zu Nachweisen",
+  meeting_reminder: "Erinnerungen an Treffen",
+};
