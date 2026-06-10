@@ -29,6 +29,7 @@ import {
   loadMeetings,
   type MeetingItem,
 } from "@/lib/meetings";
+import { setActiveChat } from "@/lib/notifications";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function Chat() {
@@ -95,10 +96,13 @@ export default function Chat() {
   }, [matchId, appendMessage]);
 
   // Treffen neu laden, sobald der Chat wieder im Fokus ist (nach Planen/Bewerten).
+  // Solange dieser Chat offen ist, unterdrückt setActiveChat sein Push-Banner.
   useFocusEffect(
     useCallback(() => {
       reloadMeetings();
-    }, [reloadMeetings]),
+      setActiveChat(matchId);
+      return () => setActiveChat(null);
+    }, [reloadMeetings, matchId]),
   );
 
   async function handleSend() {

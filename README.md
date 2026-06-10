@@ -42,3 +42,16 @@ supabase db push
 ```
 
 Auth läuft über Magic Link (`signInWithOtp`) mit Deep-Link-Redirect auf `zeitbruecke://auth/callback`.
+
+## Push-Benachrichtigungen
+
+Pushes laufen über den Expo Push Service und werden serverseitig von der Edge Function `process-outbox` aus der `notification_outbox` versendet (Outbox-Pattern, deutsche Texte, nie Nachrichteninhalte).
+
+> ⚠️ Push funktioniert **nicht in Expo Go**. Zum Testen ist ein EAS Development Build auf einem echten Gerät nötig: `eas build --profile development`. Im Simulator und im Demo-Modus werden keine echten Pushes verschickt; der Einstellungs-Screen funktioniert trotzdem lokal.
+
+Edge Function deployen und per Cron (jede Minute) triggern:
+
+```bash
+supabase functions deploy process-outbox
+# Cron-Trigger z. B. über das Supabase-Dashboard oder pg_cron + net.http_post
+```

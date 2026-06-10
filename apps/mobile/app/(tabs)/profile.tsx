@@ -16,8 +16,15 @@ import {
 } from "@zeitbruecke/shared";
 
 import { DemoBanner } from "@/components/DemoBanner";
-import { BodyText, PrimaryButton, ScreenContainer, Title } from "@/components/ui";
+import {
+  BodyText,
+  PrimaryButton,
+  ScreenContainer,
+  SecondaryButton,
+  Title,
+} from "@/components/ui";
 import { useOnboarding } from "@/lib/onboarding";
+import { deletePushToken } from "@/lib/notifications";
 import { isDemo, supabase } from "@/lib/supabase";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 import {
@@ -63,7 +70,14 @@ function Row({ label, value }: { label: string; value: string }) {
 
 export default function Profile() {
   const router = useRouter();
-  const { state } = useOnboarding();
+  const { state, clear } = useOnboarding();
+
+  async function handleLogout() {
+    await deletePushToken().catch(() => undefined);
+    if (supabase) await supabase.auth.signOut().catch(() => undefined);
+    await clear();
+    router.replace("/");
+  }
   const [profile, setProfile] = useState<ProfileView | null>(null);
   const [verifications, setVerifications] = useState<VerificationEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,6 +286,29 @@ export default function Profile() {
         <Row label="Postleitzahl" value={profile.postalCode} />
         {profile.bio ? <Row label="Kurzvorstellung" value={profile.bio} /> : null}
       </View>
+
+      <View style={styles.card}>
+        {!isDemo ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/benachrichtigungen/erlaubnis")}
+            style={styles.navRow}
+          >
+            <Text style={styles.navLabel}>Benachrichtigungen aktivieren</Text>
+            <Text style={styles.chevron}>›</Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/einstellungen/benachrichtigungen")}
+          style={styles.navRow}
+        >
+          <Text style={styles.navLabel}>Benachrichtigungen verwalten</Text>
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
+      </View>
+
+      <SecondaryButton label="Abmelden" onPress={handleLogout} />
     </ScreenContainer>
   );
 }
@@ -307,6 +344,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     minHeight: touchTarget.minHeight,
     gap: spacing.sm,
+  },
+  navRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: touchTarget.minHeight,
+    gap: spacing.sm,
+  },
+  navLabel: {
+    fontSize: fontSize.bodyLarge,
+    color: colors.text,
+    fontWeight: "600",
   },
   chevron: {
     fontSize: fontSize.title,
