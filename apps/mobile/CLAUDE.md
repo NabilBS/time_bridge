@@ -4,10 +4,11 @@ Expo-App (expo-router, TypeScript strict). Einstieg: `pnpm start` in diesem Verz
 
 ## Struktur
 
-- `app/` – Routen (expo-router). Onboarding unter `app/onboarding/`, Tabs unter `app/(tabs)/`, Auth-Callback unter `app/auth/callback.tsx`.
+- `app/` – Routen (expo-router). Onboarding unter `app/onboarding/`, Tabs unter `app/(tabs)/`, Auth-Callback unter `app/auth/callback.tsx`, Verifizierung unter `app/verifizierung/` (Detail `[type].tsx`, Upload `upload/[type].tsx`).
 - `lib/theme.ts` – **einzige** Quelle für Farben, Abstände, Schriftgrößen, Radien. Keine hartkodierten Werte in Screens.
 - `lib/supabase.ts` – Supabase-Client (AsyncStorage als `auth.storage`) und `isDemo`-Flag.
 - `lib/onboarding.ts` – Onboarding-State als Context + Reducer, persistiert in AsyncStorage (App-Kill-sicher).
+- `lib/verifications.ts` – Nachweise laden/einreichen (real + Demo), Datei-Validierung (10 MB, JPG/PNG/HEIC/PDF), Pfad-Konvention `verificationDocPath` aus `@zeitbruecke/shared`. `trust_level` schreibt nie die App – das macht der DB-Trigger.
 - `components/` – wiederverwendbare UI-Bausteine (Buttons, Chips, ProgressHeader, …).
 
 ## Regeln

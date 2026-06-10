@@ -70,6 +70,76 @@ create policy "availabilities_update_own" on public.availabilities
 create policy "availabilities_delete_own" on public.availabilities
   for delete to authenticated using (profile_id = auth.uid());
 
+-- Verifizierungen: Nachweise je Vertrauensstufe. Prüfung läuft über die
+-- Service-Role (Pilot: Supabase Studio) – Nutzer dürfen nur einreichen und lesen.
+create type public.verification_type as enum (
+  'video_ident',
+  'background_check',
+  'first_aid_child',
+  'training_course',
+  'partner_reference'
+);
+
+create type public.verification_status as enum ('submitted', 'approved', 'rejected', 'expired');
+
+create table public.verifications (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles (id) on delete cascade,
+  type public.verification_type not null,
+  status public.verification_status not null default 'submitted',
+  document_path text,
+  valid_until date,
+  created_at timestamptz not null default now()
+);
+
+alter table public.verifications enable row level security;
+
+create policy "verifications_select_own" on public.verifications
+  for select to authenticated using (profile_id = auth.uid());
+
+create policy "verifications_insert_own" on public.verifications
+  for insert to authenticated
+  with check (profile_id = auth.uid() and status = 'submitted');
+
+-- Kein UPDATE/DELETE für Nutzer: Statuswechsel nur über Service-Role.
+
+-- Vertrauensstufe wird ausschließlich aus den Verifizierungen abgeleitet:
+-- Stufe 2 = Video-Ident bestätigt, Stufe 3 = zusätzlich erweitertes
+-- Führungszeugnis bestätigt. App-Code schreibt trust_level nie selbst.
+create or replace function public.recompute_trust_level()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  affected_profile uuid := coalesce(new.profile_id, old.profile_id);
+  has_video_ident boolean;
+  has_background_check boolean;
+begin
+  select
+    bool_or(type = 'video_ident' and status = 'approved'),
+    bool_or(type = 'background_check' and status = 'approved')
+  into has_video_ident, has_background_check
+  from public.verifications
+  where profile_id = affected_profile;
+
+  update public.profiles
+  set trust_level = case
+    when coalesce(has_video_ident, false) and coalesce(has_background_check, false) then 3
+    when coalesce(has_video_ident, false) then 2
+    else 1
+  end
+  where id = affected_profile;
+
+  return coalesce(new, old);
+end;
+$$;
+
+create trigger verifications_recompute_trust_level
+  after insert or update or delete on public.verifications
+  for each row execute function public.recompute_trust_level();
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql

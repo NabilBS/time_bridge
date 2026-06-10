@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactElement, type ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
   type KeyboardTypeOptions,
+  type RefreshControlProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -15,9 +16,11 @@ import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 export function ScreenContainer({
   children,
   scroll = true,
+  refreshControl,
 }: {
   children: ReactNode;
   scroll?: boolean;
+  refreshControl?: ReactElement<RefreshControlProps>;
 }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
@@ -25,6 +28,7 @@ export function ScreenContainer({
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          refreshControl={refreshControl}
         >
           {children}
         </ScrollView>
