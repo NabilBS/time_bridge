@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Zeitbrücke",
+    "slug": "zeitbruecke",
+    "version": "0.1.0",
+    "scheme": "zeitbruecke",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "de.zeitbruecke.app"
+    },
+    "android": {
+      "package": "de.zeitbruecke.app"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
