@@ -1,0 +1,4 @@
+# Next.js Build-Ausgaben
+.next/
+out/
+*.tsbuildinfo
