@@ -9,6 +9,7 @@ Expo-App (expo-router, TypeScript strict). Einstieg: `pnpm start` in diesem Verz
 - `lib/supabase.ts` – Supabase-Client (AsyncStorage als `auth.storage`) und `isDemo`-Flag.
 - `lib/onboarding.ts` – Onboarding-State als Context + Reducer, persistiert in AsyncStorage (App-Kill-sicher).
 - `lib/verifications.ts` – Nachweise laden/einreichen (real + Demo), Datei-Validierung (10 MB, JPG/PNG/HEIC/PDF), Pfad-Konvention `verificationDocPath` aus `@zeitbruecke/shared`. `trust_level` schreibt nie die App – das macht der DB-Trigger.
+- `lib/matching.ts` – Entdecken/Anfragen/Matches/Chat/Melden (real + Demo). Annahme einer Anfrage läuft NUR über `supabase.rpc(RPC_ACCEPT_REQUEST, …)`, nie per Update. Chat nutzt Realtime (`postgres_changes` auf `messages`, RLS-gefiltert) und optimistisches Senden mit Rollback. Routen: Tabs Entdecken/Anfragen/Chats/Profil, `app/profil-detail/[id]`, `app/chat/[matchId]`, `app/melden/[profileId]`.
 - `components/` – wiederverwendbare UI-Bausteine (Buttons, Chips, ProgressHeader, …).
 
 ## Regeln
