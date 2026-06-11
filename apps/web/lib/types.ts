@@ -49,6 +49,50 @@ export interface ReportRow {
   created_at: string;
 }
 
+/* KPI-Views aus Auftrag 008 – ausschließlich Aggregate, Zellen mit n < 5
+ * liefert die Datenbank als null (im UI als „–" rendern, nie als 0). */
+
+export interface KpiProfilesWeeklyRow {
+  week: string;
+  role: string;
+  district: string | null;
+  new_profiles: number | null;
+}
+
+export interface KpiSeniorsByTrustRow {
+  trust_level: number;
+  seniors: number | null;
+}
+
+export interface KpiFunnelWeeklyRow {
+  week: string;
+  requests: number | null;
+  accepted: number | null;
+  matches: number | null;
+  matches_with_completed_meeting: number | null;
+}
+
+export interface KpiMeetingsWeeklyRow {
+  week: string;
+  planned: number | null;
+  completed: number | null;
+  cancelled: number | null;
+  first_meeting_partner_pct: number | null;
+}
+
+export interface KpiRetentionRow {
+  total_matches: number | null;
+  matches_with_two_completed: number | null;
+}
+
+export interface KpiSurveysWeeklyRow {
+  week: string;
+  kind: string;
+  responses: number | null;
+  avg_score: number | null;
+  nps: number | null;
+}
+
 export interface PartnerLocationRow {
   id: string;
   name: string;

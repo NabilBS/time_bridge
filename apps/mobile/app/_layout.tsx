@@ -3,8 +3,11 @@ import { StatusBar } from "expo-status-bar";
 
 import { NotificationDeepLinks } from "@/components/NotificationDeepLinks";
 import { OnboardingProvider } from "@/lib/onboarding";
+import { initSentry, Sentry, sentryEnabled } from "@/lib/sentry";
 
-export default function RootLayout() {
+initSentry();
+
+function RootLayout() {
   return (
     <OnboardingProvider>
       <StatusBar style="dark" />
@@ -13,3 +16,5 @@ export default function RootLayout() {
     </OnboardingProvider>
   );
 }
+
+export default sentryEnabled ? Sentry.wrap(RootLayout) : RootLayout;

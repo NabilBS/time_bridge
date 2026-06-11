@@ -75,3 +75,32 @@ Ergebnisse im PR dokumentieren.
 
 ### RLS-Negativtest Benachrichtigungen
 Nutzer B darf weder `push_tokens` noch `notification_outbox`-Zeilen von Nutzer A sehen: `select` als B auf fremde Zeilen → leer (Outbox: gar keine Policy, push_tokens: nur eigene).
+
+## Konto-Löschung (Auftrag 007)
+
+- Läuft NUR über die RPC `delete_account()` (security definer, ohne Parameter – löscht immer `auth.uid()`): erst Storage-Objekte (`verification-docs/{uid}/*`, `avatars/{uid}/*`), dann `auth.users` → Kaskade räumt `profiles` und alles Abhängige (Matches, Nachrichten, Treffen, Bewertungen, Tokens, Outbox, Surveys). Schlägt die Storage-Löschung fehl, bricht die Function ab (keine halben Zustände).
+- FK-Reparatur in 0007: `verifications.reviewed_by` → `on delete set null`, `matches.request_id` → `on delete set null`; alle übrigen Profil-FKs kaskadierten bereits (0001/0005).
+- Hinweis: `delete from storage.objects` entfernt die Objektzeilen; physische Dateireste im Objektspeicher räumt Supabase intern bzw. ein periodischer Cleanup – im Piloten akzeptiert, im PR dokumentieren.
+- Outbox-Hygiene: gelöschte Empfänger kaskadieren aus `notification_outbox`/`push_tokens`; `process-outbox` behandelt Empfänger ohne Tokens als zugestellt (kein Crash bei verwaisten Einträgen).
+- Volljährigkeit: `profiles.birth_year <= 2008` (0007 verschärft den Check aus 0001; Shared-Konstante `BIRTH_YEAR_MAX` entsprechend 2008).
+
+## Wirkungsmessung (Auftrag 008) – KPI ↔ BSS-Exposé
+
+| View | Belegt |
+|---|---|
+| `kpi_profiles_weekly` | Wachstum: neue Profile je Woche/Rolle/Bezirk |
+| `kpi_seniors_by_trust` | „50 verifizierte Senioren" (Stufe ≥ 2) |
+| `kpi_funnel_weekly` | Kern-Loop: Anfragen → angenommen → Matches → Matches mit ≥ 1 Treffen |
+| `kpi_meetings_weekly` | „100 zustande gekommene Treffen"; Kontrollmetrik Erst-Treffen an Partner-Orten (Soll: 100 % – beweist Trigger aus 0005) |
+| `kpi_retention` | Wiederkehrende Treffen (Matches mit ≥ 2 abgeschlossenen) – zentrale Wirkungs-KPI |
+| `kpi_surveys_weekly` | NPS (Promotoren − Detraktoren), Einsamkeits-/Entlastungswerte |
+
+- **Nur Aggregate:** Zellen mit n < 5 liefern `null` (kein Rückschluss auf Einzelpersonen in kleinen Bezirken). Views haben **keine Grants** für `authenticated`/`anon` – nur Service-Role liest (Web-Admin `/kennzahlen`).
+- **Befragungs-Rhythmus:** Unique-Index auf `(profile_id, kind, period)`; `period` = generierte Spalte mit festen 60-Tage-Buckets seit Epoche (`floor(epoch/5184000)`). Grenzfall (zwei Antworten kurz vor/nach Bucket-Grenze) bewusst akzeptiert – die App drosselt zusätzlich lokal (frühestens alle 60 Tage, erst nach dem zweiten abgeschlossenen Treffen).
+- Datenschutzerklärung: Befragungsdaten ergänzen → `docs/offene-rechtsfragen.md`.
+
+### Negativtests Wirkungsmessung
+1. Nutzer B liest keine Surveys von Nutzer A (`select` → leer).
+2. `authenticated` kann keine `kpi_`-View abfragen (permission denied).
+3. Zweite Antwort gleicher Art im selben 60-Tage-Bucket → Unique-Verletzung.
+4. Mini-Datensatz (< 5 Zeilen je Zelle) → Views liefern `null` statt Zahlen.

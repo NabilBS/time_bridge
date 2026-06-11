@@ -200,3 +200,31 @@ export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationKind, string> = {
   verification_decided: "Entscheidungen zu Nachweisen",
   meeting_reminder: "Erinnerungen an Treffen",
 };
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 007 – Launch-Härtung                                        */
+/* ------------------------------------------------------------------ */
+
+/** Konto-Löschung läuft NUR über diese RPC – nie über direkte Deletes. */
+export const RPC_DELETE_ACCOUNT = "delete_account";
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 008 – Wirkungsmessung                                       */
+/* ------------------------------------------------------------------ */
+
+export const SurveyKind = z.enum([
+  "nps", // "Würden Sie Zeitbrücke weiterempfehlen?" – Skala 0–10
+  "wellbeing_senior", // "Fühlen Sie sich durch Zeitbrücke weniger allein?" – Skala 1–5
+  "relief_family", // "Entlastet Zeitbrücke Ihren Familienalltag?" – Skala 1–5
+]);
+export type SurveyKind = z.infer<typeof SurveyKind>;
+
+export const SurveySchema = z.object({
+  id: z.string().uuid(),
+  profile_id: z.string().uuid(),
+  kind: SurveyKind,
+  score: z.number().int().min(0).max(10), // Bedeutung je kind, s. Enum
+  comment: z.string().max(600).nullable(),
+  created_at: z.string(),
+});
+export type Survey = z.infer<typeof SurveySchema>;

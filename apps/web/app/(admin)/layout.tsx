@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Link href="/verifizierungen">Verifizierungen</Link>
             <Link href="/meldungen">Meldungen</Link>
             <Link href="/partner-orte">Partner-Orte</Link>
+            <Link href="/kennzahlen">Kennzahlen</Link>
           </nav>
           <div className="session">
             <span className="session-email">{admin.email}</span>

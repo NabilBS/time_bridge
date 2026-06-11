@@ -243,6 +243,20 @@ async function setMeetingStatus(meetingId: string, status: MeetingStatus): Promi
 export const cancelMeeting = (meetingId: string) => setMeetingStatus(meetingId, "cancelled");
 export const completeMeeting = (meetingId: string) => setMeetingStatus(meetingId, "completed");
 
+/** Abgeschlossene Treffen des Nutzers über alle Matches (RLS begrenzt auf eigene). */
+export async function countCompletedMeetings(): Promise<number> {
+  if (isDemo || !supabase) {
+    const state = await loadDemoState();
+    return state.meetings.filter((m) => m.status === "completed").length;
+  }
+  const { count, error } = await supabase
+    .from("meetings")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "completed");
+  if (error) return 0;
+  return count ?? 0;
+}
+
 /* ------------------------------------------------------------------ */
 /* Bewertungen                                                         */
 /* ------------------------------------------------------------------ */

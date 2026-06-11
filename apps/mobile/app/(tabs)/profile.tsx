@@ -16,15 +16,8 @@ import {
 } from "@zeitbruecke/shared";
 
 import { DemoBanner } from "@/components/DemoBanner";
-import {
-  BodyText,
-  PrimaryButton,
-  ScreenContainer,
-  SecondaryButton,
-  Title,
-} from "@/components/ui";
+import { BodyText, PrimaryButton, ScreenContainer, Title } from "@/components/ui";
 import { useOnboarding } from "@/lib/onboarding";
-import { deletePushToken } from "@/lib/notifications";
 import { isDemo, supabase } from "@/lib/supabase";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 import {
@@ -70,14 +63,7 @@ function Row({ label, value }: { label: string; value: string }) {
 
 export default function Profile() {
   const router = useRouter();
-  const { state, clear } = useOnboarding();
-
-  async function handleLogout() {
-    await deletePushToken().catch(() => undefined);
-    if (supabase) await supabase.auth.signOut().catch(() => undefined);
-    await clear();
-    router.replace("/");
-  }
+  const { state } = useOnboarding();
   const [profile, setProfile] = useState<ProfileView | null>(null);
   const [verifications, setVerifications] = useState<VerificationEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -300,15 +286,13 @@ export default function Profile() {
         ) : null}
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push("/einstellungen/benachrichtigungen")}
+          onPress={() => router.push("/einstellungen")}
           style={styles.navRow}
         >
-          <Text style={styles.navLabel}>Benachrichtigungen verwalten</Text>
+          <Text style={styles.navLabel}>Einstellungen</Text>
           <Text style={styles.chevron}>›</Text>
         </Pressable>
       </View>
-
-      <SecondaryButton label="Abmelden" onPress={handleLogout} />
     </ScreenContainer>
   );
 }

@@ -13,3 +13,21 @@ Diese Punkte sind **vor Public Launch** anwaltlich zu klären. Der Pilotprozess 
 
 - [ ] Kanzlei beauftragt
 - [ ] Prozess freigegeben oder Anpassung definiert
+
+## Meldungen nach Konto-Löschung (Auftrag 007)
+
+Ob Missbrauchsmeldungen nach einer Konto-Löschung (anonymisiert) aufbewahrt werden dürfen oder müssen, ist anwaltlich zu klären. **Bis dahin gilt vollständige Löschung:** `reports.reporter_profile` und `reports.reported_profile` kaskadieren – mit dem Konto verschwinden auch die Meldungen.
+
+- [ ] Aufbewahrungspflicht/-erlaubnis geklärt; ggf. Anonymisierungs-Migration als Folgeauftrag
+
+## Befragungsdaten (Auftrag 008)
+
+Die freiwillige In-App-Kurzbefragung (NPS, Einsamkeits-/Entlastungswert, optionaler Freitext) ist in die **Datenschutzerklärung aufzunehmen** (Zweck: Wirkungsmessung/Förder-Reporting; Auswertung nur aggregiert, Zellen < 5 werden unterdrückt; Antworten löschen sich mit dem Konto).
+
+- [ ] Datenschutzerklärung ergänzt
+
+## DSFA vor Public Launch (Auftrag 007)
+
+Datenschutz-Folgenabschätzung (Art. 35 DSGVO) ist vor dem öffentlichen Launch zu erstellen – besonders sensible Verarbeitung (Strafregisterdaten, Kontakt zwischen Senioren und Familien mit Kindern).
+
+- [ ] DSFA beauftragt und abgeschlossen

@@ -47,7 +47,8 @@ export const WEEKDAYS = [
 ] as const;
 
 export const BIRTH_YEAR_MIN = 1920;
-export const BIRTH_YEAR_MAX = 2012;
+// Zeitbrücke ist für Erwachsene (ab 18) – verschärft mit Auftrag 007.
+export const BIRTH_YEAR_MAX = 2008;
 
 export const CHILDREN_COUNT_MIN = 1;
 export const CHILDREN_COUNT_MAX = 10;

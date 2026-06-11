@@ -30,6 +30,7 @@ import {
   type MeetingItem,
 } from "@/lib/meetings";
 import { setActiveChat } from "@/lib/notifications";
+import { shouldShowSurvey } from "@/lib/surveys";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function Chat() {
@@ -200,7 +201,16 @@ export default function Chat() {
                 {isPast(meeting.scheduled_at) ? (
                   <Pressable
                     accessibilityRole="button"
-                    onPress={() => handleMeetingAction(() => completeMeeting(meeting.id))}
+                    onPress={() =>
+                      handleMeetingAction(async () => {
+                        await completeMeeting(meeting.id);
+                        // Kurzbefragung erst ab dem zweiten abgeschlossenen
+                        // Treffen, höchstens alle 60 Tage (lib/surveys).
+                        if (await shouldShowSurvey()) {
+                          router.push("/befragung");
+                        }
+                      })
+                    }
                     style={styles.meetingAction}
                   >
                     <Text style={styles.meetingActionLabel}>Hat stattgefunden</Text>
