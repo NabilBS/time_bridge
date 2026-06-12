@@ -15,9 +15,11 @@ import {
   WEEKDAYS,
 } from "@zeitbruecke/shared";
 
+import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { BodyText, PrimaryButton, ScreenContainer, Title } from "@/components/ui";
 import { useOnboarding } from "@/lib/onboarding";
+import { loadPhotoState, type PhotoState } from "@/lib/photos";
 import { isDemo, supabase } from "@/lib/supabase";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 import {
@@ -39,6 +41,7 @@ const VERIFICATION_STATUS_SHORT: Record<string, string> = {
 
 interface ProfileView {
   displayName: string;
+  photo: PhotoState | null;
   roleLabel: string;
   isSenior: boolean;
   birthYear: number | null;
@@ -82,8 +85,10 @@ export default function Profile() {
         .filter((entry): entry is string => entry !== null)
         .join(", ");
 
+      const photoState = await loadPhotoState().catch(() => null);
       setVerifications(entries);
       setProfile({
+        photo: photoState,
         displayName: state.displayName || "Demo-Profil",
         roleLabel:
           state.role === "family" ? "Wir suchen Unterstützung" : "Ich möchte Zeit schenken",
@@ -156,8 +161,10 @@ export default function Profile() {
       entries = await loadVerifications().catch(() => [] as VerificationEntry[]);
     }
 
+    const photoState = await loadPhotoState().catch(() => null);
     setVerifications(entries);
     setProfile({
+      photo: photoState,
       displayName: row.display_name,
       roleLabel: row.role === "family" ? "Wir suchen Unterstützung" : "Ich möchte Zeit schenken",
       isSenior: row.role !== "family",
@@ -218,7 +225,15 @@ export default function Profile() {
       }
     >
       <DemoBanner />
-      <Title>{profile.displayName}</Title>
+      <View style={styles.avatarRow}>
+        <Avatar
+          name={profile.displayName}
+          photoPath={profile.photo?.pendingUri ?? profile.photo?.photoPath}
+          size={88}
+          pending={profile.photo?.submissionStatus === "submitted"}
+        />
+        <Title>{profile.displayName}</Title>
+      </View>
       <View style={styles.trustBadge}>
         <Text style={styles.trustText}>Vertrauensstufe {profile.trustLevel} von 3</Text>
       </View>
@@ -286,6 +301,14 @@ export default function Profile() {
         ) : null}
         <Pressable
           accessibilityRole="button"
+          onPress={() => router.push("/profil-foto")}
+          style={styles.navRow}
+        >
+          <Text style={styles.navLabel}>Profilfoto</Text>
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           onPress={() => router.push("/einstellungen")}
           style={styles.navRow}
         >
@@ -298,6 +321,11 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
+  avatarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
   trustBadge: {
     alignSelf: "flex-start",
     backgroundColor: colors.primarySoft,

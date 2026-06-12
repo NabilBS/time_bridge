@@ -31,3 +31,10 @@ Die freiwillige In-App-Kurzbefragung (NPS, Einsamkeits-/Entlastungswert, optiona
 Datenschutz-Folgenabschätzung (Art. 35 DSGVO) ist vor dem öffentlichen Launch zu erstellen – besonders sensible Verarbeitung (Strafregisterdaten, Kontakt zwischen Senioren und Familien mit Kindern).
 
 - [ ] DSFA beauftragt und abgeschlossen
+
+## Video-Ident: Eskalationsabruf & Aufbewahrung (Auftrag 010)
+
+Die Identitätsdaten (Ausweis, Selfie) liegen ausschließlich beim Ident-Anbieter (AVV); Zeitbrücke speichert nur das Ergebnis. Anwaltlich zu klären: **Rechtsgrundlage eines Eskalationsabrufs** (in welchen Fällen darf das Team Identitätsdaten beim Anbieter einsehen, definierter Prozess) und **Aufbewahrungsfristen beim Anbieter**. Vertrag + AVV vor Anbindung des echten Anbieters.
+
+- [ ] Eskalationsprozess definiert und geprüft
+- [ ] AVV mit gewähltem Anbieter geschlossen

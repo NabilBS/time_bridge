@@ -228,3 +228,38 @@ export const SurveySchema = z.object({
   created_at: z.string(),
 });
 export type Survey = z.infer<typeof SurveySchema>;
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 009 – Profilfotos mit Moderation                            */
+/* ------------------------------------------------------------------ */
+
+/** Foto-Einreichungen folgen dem Verifizierungs-Muster; 'expired' bleibt ungenutzt. */
+export const PhotoSubmissionSchema = z.object({
+  id: z.string().uuid(),
+  profile_id: z.string().uuid(),
+  storage_path: z.string(),
+  status: VerificationStatus,
+  review_note: z.string().nullable(),
+  created_at: z.string(),
+});
+export type PhotoSubmission = z.infer<typeof PhotoSubmissionSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Auftrag 010 – Video-Ident-Integration                               */
+/* ------------------------------------------------------------------ */
+
+export const IdentSessionStatus = z.enum(["created", "completed", "failed", "expired"]);
+export type IdentSessionStatus = z.infer<typeof IdentSessionStatus>;
+
+export const IdentSessionSchema = z.object({
+  id: z.string().uuid(),
+  profile_id: z.string().uuid(),
+  provider: z.string(),
+  status: IdentSessionStatus,
+  created_at: z.string(),
+  completed_at: z.string().nullable(),
+});
+export type IdentSession = z.infer<typeof IdentSessionSchema>;
+
+/** Edge-Function-Namen – Aufruf nur über diese Konstanten. */
+export const EDGE_IDENT_START = "ident-start";

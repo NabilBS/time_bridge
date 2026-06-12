@@ -8,6 +8,7 @@ import {
   type SearchFilter,
 } from "@zeitbruecke/shared";
 
+import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { TrustBadge } from "@/components/TrustBadge";
 import { BodyText, Chip, ScreenContainer, SecondaryButton, Title } from "@/components/ui";
@@ -158,8 +159,13 @@ export default function Discover() {
           onPress={() => router.push(`/profil-detail/${profile.id}`)}
           style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
         >
-          <Text style={styles.cardName}>{profile.display_name}</Text>
-          <Text style={styles.cardMeta}>{profile.district}</Text>
+          <View style={styles.cardHeader}>
+            <Avatar name={profile.display_name} photoPath={profile.photo_path} size={56} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardName}>{profile.display_name}</Text>
+              <Text style={styles.cardMeta}>{profile.district}</Text>
+            </View>
+          </View>
           <TrustBadge level={profile.trust_level} />
           {profile.interests.length > 0 ? (
             <Text style={styles.cardInterests}>{profile.interests.join(" · ")}</Text>
@@ -190,6 +196,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   card: {
     backgroundColor: colors.surface,

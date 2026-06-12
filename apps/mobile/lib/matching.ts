@@ -28,6 +28,7 @@ export interface DiscoverProfile {
   interests: string[];
   bio: string | null;
   birth_year: number;
+  photo_path: string | null;
 }
 
 export interface RequestItem {
@@ -35,6 +36,7 @@ export interface RequestItem {
   direction: "received" | "sent";
   otherName: string;
   otherId: string;
+  otherPhotoPath: string | null;
   message: string | null;
   status: MatchRequestStatus;
   created_at: string;
@@ -44,6 +46,7 @@ export interface MatchItem {
   id: string;
   partnerId: string | null;
   partnerName: string;
+  partnerPhotoPath: string | null;
   partnerActive: boolean;
   lastMessage: string | null;
 }
@@ -86,6 +89,7 @@ export const DEMO_PROFILES: DiscoverProfile[] = [
     interests: ["Vorlesen", "Backen", "Gesellschaftsspiele"],
     bio: "Ehemalige Bibliothekarin, liebt Geschichten und Apfelkuchen.",
     birth_year: 1954,
+    photo_path: null,
   },
   {
     id: "00000000-0000-4000-8000-000000000102",
@@ -96,6 +100,7 @@ export const DEMO_PROFILES: DiscoverProfile[] = [
     interests: ["Werken", "Natur", "Sport"],
     bio: "Tischler im Ruhestand – baut gern Vogelhäuser mit Kindern.",
     birth_year: 1949,
+    photo_path: null,
   },
   {
     id: "00000000-0000-4000-8000-000000000103",
@@ -106,6 +111,7 @@ export const DEMO_PROFILES: DiscoverProfile[] = [
     interests: ["Hausaufgaben", "Sprachen", "Musik"],
     bio: "War Lehrerin und hilft gern bei Mathe und Französisch.",
     birth_year: 1958,
+    photo_path: null,
   },
   {
     id: "00000000-0000-4000-8000-000000000201",
@@ -116,6 +122,7 @@ export const DEMO_PROFILES: DiscoverProfile[] = [
     interests: ["Vorlesen", "Spielplatz"],
     bio: "Zwei Kinder (3 und 6), wir suchen eine Leih-Oma im Kiez.",
     birth_year: 1988,
+    photo_path: null,
   },
   {
     id: "00000000-0000-4000-8000-000000000202",
@@ -126,6 +133,7 @@ export const DEMO_PROFILES: DiscoverProfile[] = [
     interests: ["Hausaufgaben", "Musik"],
     bio: "Unsere Tochter (9) freut sich über Unterstützung bei den Hausaufgaben.",
     birth_year: 1985,
+    photo_path: null,
   },
 ];
 
@@ -241,7 +249,7 @@ export async function discoverProfiles(
   const me = await ownId();
   let query = supabase
     .from("profiles")
-    .select("id, role, display_name, district, trust_level, interests, bio, birth_year")
+    .select("id, role, display_name, district, trust_level, interests, bio, birth_year, photo_path")
     .eq("role", targetRole)
     .eq("is_active", true)
     .neq("id", me)
@@ -269,7 +277,7 @@ export async function loadProfileDetail(profileId: string): Promise<{
   }
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, role, display_name, district, trust_level, interests, bio, birth_year")
+    .select("id, role, display_name, district, trust_level, interests, bio, birth_year, photo_path")
     .eq("id", profileId)
     .maybeSingle();
   if (error) throw new Error(OFFLINE_MESSAGE);
@@ -345,6 +353,7 @@ export async function loadRequests(): Promise<RequestItem[]> {
         const received = request.to_profile === DEMO_SELF_ID;
         const otherId = received ? request.from_profile : request.to_profile;
         return {
+          otherPhotoPath: null,
           id: request.id,
           direction: received ? "received" : "sent",
           otherId,
@@ -362,8 +371,8 @@ export async function loadRequests(): Promise<RequestItem[]> {
     .from("match_requests")
     .select(
       `id, from_profile, to_profile, message, status, created_at,
-       sender:profiles!match_requests_from_profile_fkey (id, display_name),
-       recipient:profiles!match_requests_to_profile_fkey (id, display_name)`,
+       sender:profiles!match_requests_from_profile_fkey (id, display_name, photo_path),
+       recipient:profiles!match_requests_to_profile_fkey (id, display_name, photo_path)`,
     )
     .or(`from_profile.eq.${me},to_profile.eq.${me}`)
     .order("created_at", { ascending: false });
@@ -377,8 +386,8 @@ export async function loadRequests(): Promise<RequestItem[]> {
       message: string | null;
       status: MatchRequestStatus;
       created_at: string;
-      sender: { id: string; display_name: string } | null;
-      recipient: { id: string; display_name: string } | null;
+      sender: { id: string; display_name: string; photo_path: string | null } | null;
+      recipient: { id: string; display_name: string; photo_path: string | null } | null;
     };
     const received = record.to_profile === me;
     const other = received ? record.sender : record.recipient;
@@ -387,6 +396,7 @@ export async function loadRequests(): Promise<RequestItem[]> {
       direction: received ? "received" : "sent",
       otherId: received ? record.from_profile : record.to_profile,
       otherName: other?.display_name ?? "Profil nicht mehr aktiv",
+      otherPhotoPath: other?.photo_path ?? null,
       message: record.message,
       status: record.status,
       created_at: record.created_at,
@@ -494,6 +504,7 @@ export async function loadMatches(): Promise<MatchItem[]> {
           id: match.id,
           partnerId: match.partnerId,
           partnerName: demoPartnerName(match.partnerId),
+          partnerPhotoPath: null,
           partnerActive: true,
           lastMessage: last?.body ?? null,
         };
@@ -506,8 +517,8 @@ export async function loadMatches(): Promise<MatchItem[]> {
     .from("matches")
     .select(
       `id, profile_a, profile_b, created_at,
-       a:profiles!matches_profile_a_fkey (id, display_name, is_active),
-       b:profiles!matches_profile_b_fkey (id, display_name, is_active)`,
+       a:profiles!matches_profile_a_fkey (id, display_name, is_active, photo_path),
+       b:profiles!matches_profile_b_fkey (id, display_name, is_active, photo_path)`,
     )
     .order("created_at", { ascending: false });
   if (error) throw new Error(OFFLINE_MESSAGE);
@@ -518,8 +529,8 @@ export async function loadMatches(): Promise<MatchItem[]> {
       id: string;
       profile_a: string;
       profile_b: string;
-      a: { id: string; display_name: string; is_active: boolean } | null;
-      b: { id: string; display_name: string; is_active: boolean } | null;
+      a: { id: string; display_name: string; is_active: boolean; photo_path: string | null } | null;
+      b: { id: string; display_name: string; is_active: boolean; photo_path: string | null } | null;
     };
     // Gesperrte Profile sind per RLS unsichtbar – der Join liefert dann null.
     const partner = record.profile_a === me ? record.b : record.a;
@@ -534,6 +545,7 @@ export async function loadMatches(): Promise<MatchItem[]> {
       id: record.id,
       partnerId: partner?.id ?? null,
       partnerName: partner?.display_name ?? "Profil nicht mehr aktiv",
+      partnerPhotoPath: partner?.photo_path ?? null,
       partnerActive: partner?.is_active ?? false,
       lastMessage: (last?.body as string | undefined) ?? null,
     });
@@ -559,8 +571,8 @@ export async function loadMatchHeader(
     .from("matches")
     .select(
       `id, profile_a, profile_b,
-       a:profiles!matches_profile_a_fkey (id, display_name, is_active),
-       b:profiles!matches_profile_b_fkey (id, display_name, is_active)`,
+       a:profiles!matches_profile_a_fkey (id, display_name, is_active, photo_path),
+       b:profiles!matches_profile_b_fkey (id, display_name, is_active, photo_path)`,
     )
     .eq("id", matchId)
     .maybeSingle();

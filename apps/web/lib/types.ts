@@ -29,6 +29,15 @@ export interface VerificationRow {
   created_at: string;
 }
 
+export interface PhotoSubmissionRow {
+  id: string;
+  profile_id: string;
+  storage_path: string;
+  status: VerificationStatus;
+  review_note: string | null;
+  created_at: string;
+}
+
 export interface ProfileBasics {
   id: string;
   display_name: string;

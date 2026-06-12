@@ -109,9 +109,12 @@ export default function Summary() {
       }
 
       const profile = buildProfile(state, userId);
+      // ignoreDuplicates: Retry nach Teilerfolg überspringt den bestehenden
+      // Profil-Insert (DO NOTHING) – ein Update wäre an den Spalten-Grants
+      // aus 0009 gescheitert (role/id sind für Nutzer nicht änderbar).
       const { error: profileError } = await supabase
         .from("profiles")
-        .upsert(profile, { onConflict: "id" });
+        .upsert(profile, { onConflict: "id", ignoreDuplicates: true });
       if (profileError) throw profileError;
 
       if (state.role === "family") {

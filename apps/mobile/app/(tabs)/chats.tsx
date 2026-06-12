@@ -1,7 +1,8 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, RefreshControl, StyleSheet, Text } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 
+import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { BodyText, ScreenContainer, Title } from "@/components/ui";
 import { loadMatches, OFFLINE_MESSAGE, type MatchItem } from "@/lib/matching";
@@ -55,7 +56,10 @@ export default function Chats() {
           onPress={() => router.push(`/chat/${match.id}`)}
           style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
         >
-          <Text style={styles.cardName}>{match.partnerName}</Text>
+          <View style={styles.cardHeader}>
+            <Avatar name={match.partnerName} photoPath={match.partnerPhotoPath} size={56} />
+            <Text style={styles.cardName}>{match.partnerName}</Text>
+          </View>
           <Text style={styles.cardPreview} numberOfLines={1}>
             {match.lastMessage ?? "Sagen Sie Hallo!"}
           </Text>
@@ -77,6 +81,11 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
     minHeight: touchTarget.buttonHeight,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   cardName: {
     fontSize: fontSize.bodyLarge,

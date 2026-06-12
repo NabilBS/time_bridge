@@ -16,6 +16,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </span>
           <nav className="main-nav" aria-label="Hauptnavigation">
             <Link href="/verifizierungen">Verifizierungen</Link>
+            <Link href="/fotos">Fotos</Link>
             <Link href="/meldungen">Meldungen</Link>
             <Link href="/partner-orte">Partner-Orte</Link>
             <Link href="/kennzahlen">Kennzahlen</Link>

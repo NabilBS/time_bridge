@@ -1,5 +1,6 @@
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
@@ -16,13 +17,18 @@ import {
   SecondaryButton,
   Title,
 } from "@/components/ui";
+import {
+  IDENT_OFFLINE_MESSAGE,
+  loadLatestIdentSession,
+  startIdentSession,
+  type IdentSessionInfo,
+} from "@/lib/ident";
 import { isDemo } from "@/lib/supabase";
 import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
 import {
   latestByType,
   loadVerifications,
   simulateDemoApproval,
-  submitVerification,
   VERIFICATION_ERROR_MESSAGES,
   VerificationError,
   type VerificationEntry,
@@ -54,6 +60,7 @@ export default function VerificationDetail() {
   const params = useLocalSearchParams<{ type?: string }>();
   const parsedType = VerificationType.safeParse(params.type);
   const [entry, setEntry] = useState<VerificationEntry | undefined>(undefined);
+  const [identSession, setIdentSession] = useState<IdentSessionInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,6 +70,9 @@ export default function VerificationDetail() {
     try {
       const entries = await loadVerifications();
       setEntry(latestByType(entries)[parsedType.data]);
+      if (parsedType.data === "video_ident") {
+        setIdentSession(await loadLatestIdentSession().catch(() => null));
+      }
       setLoadError(null);
     } catch (caught) {
       setLoadError(
@@ -72,6 +82,25 @@ export default function VerificationDetail() {
       );
     }
   }, [parsedType.success ? parsedType.data : null]);
+
+  async function handleStartIdent() {
+    setBusy(true);
+    setActionError(null);
+    try {
+      const redirectUrl = await startIdentSession();
+      if (redirectUrl.startsWith("zeitbruecke://")) {
+        // Demo: kein externer Anbieter – direkt zum Callback.
+        router.push("/ident/callback");
+      } else {
+        await WebBrowser.openAuthSessionAsync(redirectUrl, "zeitbruecke://ident/callback");
+      }
+      await reload();
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : IDENT_OFFLINE_MESSAGE);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     reload();
@@ -159,11 +188,27 @@ export default function VerificationDetail() {
       ) : null}
 
       {type === "video_ident" ? (
-        <BodyText>
-          Bei einem kurzen Video-Termin überzeugen wir uns persönlich, dass Sie es sind. Sie
-          brauchen dafür nur dieses Gerät und ein Ausweisdokument zum Vorzeigen – es wird nichts
-          hochgeladen oder gespeichert.
-        </BodyText>
+        <>
+          <BodyText>
+            Sie können Ihre Identität direkt online bestätigen: Ein geprüfter Anbieter sieht
+            dabei kurz Ihren Ausweis und Ihr Gesicht über die Kamera dieses Geräts.
+          </BodyText>
+          <View style={styles.privacyNote}>
+            <BodyText>
+              Zeitbrücke speichert davon nur das Ergebnis: geprüft ja oder nein. Keine
+              Ausweisdaten, keine Bilder.
+            </BodyText>
+          </View>
+          {identSession?.status === "created" ? (
+            <BodyText>Identifizierung läuft – das Ergebnis kommt in wenigen Minuten.</BodyText>
+          ) : null}
+          {identSession?.status === "failed" ? (
+            <BodyText>
+              Identifizierung nicht abgeschlossen – Sie können es erneut versuchen oder einen
+              Video-Termin buchen.
+            </BodyText>
+          ) : null}
+        </>
       ) : null}
 
       {type === "partner_reference" ? (
@@ -184,27 +229,34 @@ export default function VerificationDetail() {
       ) : null}
 
       {type === "video_ident" && canSubmit ? (
-        bookingUrl ? (
-          <PrimaryButton
-            label="Video-Termin vereinbaren"
-            onPress={() => {
-              Linking.openURL(bookingUrl).catch(() =>
-                setActionError("Der Buchungslink konnte nicht geöffnet werden."),
-              );
-            }}
-          />
-        ) : isDemo ? (
-          <PrimaryButton
-            label="Video-Ident einreichen (Demo)"
-            onPress={() => handleDemoAction(() => submitVerification("video_ident", null))}
-            disabled={busy}
-          />
-        ) : (
-          <BodyText muted>
-            Die Terminbuchung ist noch nicht eingerichtet – bitte versuchen Sie es später
-            erneut.
-          </BodyText>
-        )
+        <>
+          {identSession?.status === "created" ? (
+            <PrimaryButton label="Status aktualisieren" onPress={() => reload()} disabled={busy} />
+          ) : (
+            <PrimaryButton
+              label={busy ? "Wird gestartet …" : "Jetzt online identifizieren (ca. 5 Minuten)"}
+              onPress={handleStartIdent}
+              disabled={busy}
+            />
+          )}
+          {/* Der persönliche Weg bleibt gleichberechtigt – Barrierefreiheit,
+              keine Notlösung. */}
+          {bookingUrl ? (
+            <SecondaryButton
+              label="Lieber im persönlichen Video-Gespräch? Termin vereinbaren"
+              onPress={() => {
+                Linking.openURL(bookingUrl).catch(() =>
+                  setActionError("Der Buchungslink konnte nicht geöffnet werden."),
+                );
+              }}
+            />
+          ) : (
+            <BodyText muted>
+              Lieber im persönlichen Video-Gespräch? Die Terminbuchung wird gerade eingerichtet –
+              bitte schauen Sie bald wieder vorbei.
+            </BodyText>
+          )}
+        </>
       ) : null}
 
       {status === "rejected" ? (

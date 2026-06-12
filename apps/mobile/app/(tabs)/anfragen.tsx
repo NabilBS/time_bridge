@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 
+import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import {
   BodyText,
@@ -93,7 +94,10 @@ export default function Requests() {
       ) : (
         received.map((request) => (
           <View key={request.id} style={styles.card}>
-            <Text style={styles.cardName}>{request.otherName}</Text>
+            <View style={styles.cardHeader}>
+              <Avatar name={request.otherName} photoPath={request.otherPhotoPath} size={48} />
+              <Text style={styles.cardName}>{request.otherName}</Text>
+            </View>
             {request.message ? <BodyText>„{request.message}"</BodyText> : null}
             <PrimaryButton
               label={busyId === request.id ? "Einen Moment …" : "Annehmen"}
@@ -122,7 +126,10 @@ export default function Requests() {
       ) : (
         sent.map((request) => (
           <View key={request.id} style={styles.card}>
-            <Text style={styles.cardName}>{request.otherName}</Text>
+            <View style={styles.cardHeader}>
+              <Avatar name={request.otherName} photoPath={request.otherPhotoPath} size={48} />
+              <Text style={styles.cardName}>{request.otherName}</Text>
+            </View>
             <BodyText muted>{SENT_STATUS_TEXTS[request.status] ?? request.status}</BodyText>
             {request.status === "pending" ? (
               <SecondaryButton
@@ -151,6 +158,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   cardName: {
     fontSize: fontSize.bodyLarge,

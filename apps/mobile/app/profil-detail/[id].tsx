@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { CARE_WISHES_MAX_LENGTH, WEEKDAYS, type MatchRequestStatus } from "@zeitbruecke/shared";
 
+import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { TrustBadge } from "@/components/TrustBadge";
 import {
@@ -104,7 +105,10 @@ export default function ProfileDetail() {
     <ScreenContainer>
       <BackRow onPress={() => router.back()} />
       <DemoBanner />
-      <Title>{profile.display_name}</Title>
+      <View style={styles.headerRow}>
+        <Avatar name={profile.display_name} photoPath={profile.photo_path} size={88} />
+        <Title>{profile.display_name}</Title>
+      </View>
       <TrustBadge level={profile.trust_level} />
       <Text style={styles.reviewLine}>
         {reviewStats && reviewStats.count > 0 && reviewStats.avg != null
@@ -201,6 +205,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
     fontWeight: "600",
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   reviewLine: {
     fontSize: fontSize.body,

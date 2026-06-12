@@ -104,3 +104,30 @@ Nutzer B darf weder `push_tokens` noch `notification_outbox`-Zeilen von Nutzer A
 2. `authenticated` kann keine `kpi_`-View abfragen (permission denied).
 3. Zweite Antwort gleicher Art im selben 60-Tage-Bucket → Unique-Verletzung.
 4. Mini-Datensatz (< 5 Zeilen je Zelle) → Views liefern `null` statt Zahlen.
+
+## Profilfotos mit Moderation (Auftrag 009)
+
+- **Kein Foto ohne Freigabe:** Einreichungen liegen im privaten Bucket `avatars-pending` (Pfad-Policies wie `verification-docs`); erst die Freigabe-Action im Web-Admin kopiert nach `avatars/{uid}/avatar.jpg`, setzt `profiles.photo_path`, löscht die Pending-Datei und setzt `status = 'approved'` – atomar, bei Fehler eines Schritts bricht alles ab.
+- **Lücke geschlossen – Spalten-Grants auf `profiles`:** `authenticated` darf nur noch `display_name, birth_year, interests, district, postal_code, bio, notification_prefs` updaten (Insert: nur die Onboarding-Spalten). `photo_path`, `trust_level`, `role`, `is_active` sind für Nutzer unveränderlich; Trigger (security definer) und Service-Role sind nicht betroffen. Achtung App-Code: Upserts auf `profiles` brauchen `ignoreDuplicates` (ON CONFLICT DO UPDATE scheitert an den Grants).
+- Eine offene Einreichung je Profil (partieller Unique-Index); Ablehnung löscht die Datei und schreibt die Begründung nach `review_note`.
+- **EXIF-Pflicht (Mobile):** `expo-image-manipulator` kodiert jedes Foto neu (Resize 1024 px, JPEG) – entfernt alle Metadaten inkl. GPS. Nachweis (Vorher/Nachher-Dump z. B. mit `exiftool`) gehört in den PR.
+
+### Negativtests Profilfotos
+1. Eingereichtes, nicht freigegebenes Foto: für Nutzer B unter keiner URL abrufbar (privater Bucket, Pfad-Policy); Nutzer B liest keine fremden `photo_submissions`.
+2. Direkter Update-Versuch auf `profiles.photo_path` durch den Nutzer → permission denied (Spalten-Grant).
+3. Zweite offene Einreichung → Unique-Verletzung (UI fängt sie vorher ab).
+
+## Video-Ident (Auftrag 010)
+
+- **Architektur:** anbieterneutraler Adapter (`functions/_shared/ident-adapter.ts`; `IDENT_PROVIDER=mock` für Sandbox/Demo, REST-Vorlage für den echten Anbieter). Anbieter-Entscheidung samt Vertrag/AVV trifft das Team vor Anbindung (Kriterien in `tasks/010-video-ident.md`).
+- **`ident-start`** (auth-pflichtig): blockt bei bereits bestätigtem `video_ident` oder offener Session, legt Anbieter-Session an, speichert `ident_sessions` und gibt nur die Redirect-URL zurück.
+- **`ident-webhook`** (Deploy mit `--no-verify-jwt`): HMAC-SHA256-Signaturprüfung gegen `IDENT_WEBHOOK_SECRET` ist die erste Zeile (ungültig → 401, ohne Body-Logging); idempotent über Claim `status = 'created'`; Erfolg → Session `completed` + `verifications`-Insert `video_ident/approved` (Trigger aus 0001 hebt die Stufe), Misserfolg → `failed` + `rejected` mit neutraler Note.
+- **Datenminimierung:** gespeichert wird nur bestanden/nicht bestanden + `provider_session_id`. Keine Ausweisdaten, kein Geburtsdatum, keine Bilddaten – weder in DB noch in Logs. Eskalationsabruf beim Anbieter: siehe `docs/offene-rechtsfragen.md`.
+- pg_cron `expire-ident-sessions`: `created` älter als 24 h → `expired` (danach ist ein Neustart möglich).
+- Secrets: `supabase/functions/.env.example` (`supabase secrets set`).
+
+### Negativtests Video-Ident
+1. Webhook mit falscher Signatur → 401, keine Verarbeitung, kein Body-Log.
+2. Doppelter Callback derselben Anbieter-Session → zweiter Aufruf `processed: false`, keine zweite verifications-Zeile.
+3. Callback für unbekannte/fremde Session → folgenlos.
+4. Doppelstart: zweiter `ident-start` bei offener Session → 409; nach Cron-`expired` wieder möglich.
