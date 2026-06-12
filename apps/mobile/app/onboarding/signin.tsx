@@ -1,0 +1,177 @@
+import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { z } from "zod";
+
+import { DemoBanner } from "@/components/DemoBanner";
+import { ProgressHeader } from "@/components/ProgressHeader";
+import {
+  BodyText,
+  FieldError,
+  PrimaryButton,
+  ScreenContainer,
+  TextField,
+  Title,
+} from "@/components/ui";
+import { stepProgress, useOnboarding } from "@/lib/onboarding";
+import { isDemo, supabase } from "@/lib/supabase";
+import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+
+const EmailSchema = z.string().trim().email();
+
+function LegalLink({ label, url }: { label: string; url: string | undefined }) {
+  return (
+    <Text
+      accessibilityRole="link"
+      style={styles.link}
+      onPress={() => {
+        if (url) WebBrowser.openBrowserAsync(url).catch(() => undefined);
+      }}
+    >
+      {label}
+    </Text>
+  );
+}
+
+export default function SignIn() {
+  const router = useRouter();
+  const { state, dispatch } = useOnboarding();
+  const [email, setEmail] = useState(state.email);
+  const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const progress = stepProgress("signin", state.role);
+
+  async function handleContinue() {
+    const parsed = EmailSchema.safeParse(email);
+    if (!parsed.success) {
+      setError("Diese E-Mail-Adresse scheint ungültig zu sein.");
+      return;
+    }
+    if (!consent) {
+      setConsentError("Bitte akzeptieren Sie die AGB und die Datenschutzerklärung.");
+      return;
+    }
+    setError(null);
+    dispatch({ type: "SET_EMAIL", email: parsed.data });
+
+    if (isDemo || !supabase) {
+      // Demo: keine echte Anmeldung, direkt weiter zur Rollenwahl.
+      dispatch({ type: "SET_STEP", step: "role" });
+      router.push("/onboarding/role");
+      return;
+    }
+
+    setSending(true);
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: parsed.data,
+      options: { emailRedirectTo: Linking.createURL("auth/callback") },
+    });
+    setSending(false);
+
+    if (otpError) {
+      setError(
+        "Keine Verbindung – Ihre Eingaben sind gespeichert, bitte versuchen Sie es gleich erneut.",
+      );
+      return;
+    }
+    router.push("/onboarding/check-email");
+  }
+
+  return (
+    <ScreenContainer>
+      {progress ? <ProgressHeader current={progress.current} total={progress.total} /> : null}
+      <DemoBanner />
+      <Title>Anmelden</Title>
+      <BodyText>
+        Geben Sie Ihre E-Mail-Adresse ein. Wir schicken Ihnen einen Anmelde-Link – ganz ohne
+        Passwort.
+      </BodyText>
+      <TextField
+        label="E-Mail-Adresse"
+        value={email}
+        onChangeText={(text) => {
+          setEmail(text);
+          if (error) setError(null);
+        }}
+        error={error}
+        placeholder="ihre.adresse@beispiel.de"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: consent }}
+        onPress={() => {
+          setConsent((value) => !value);
+          if (consentError) setConsentError(null);
+        }}
+        style={styles.consentRow}
+      >
+        <View style={[styles.checkbox, consent && styles.checkboxChecked]}>
+          {consent ? <Text style={styles.checkmark}>✓</Text> : null}
+        </View>
+        <Text style={styles.consentText}>
+          Ich akzeptiere die <LegalLink label="AGB" url={process.env.EXPO_PUBLIC_TERMS_URL} /> und
+          habe die{" "}
+          <LegalLink
+            label="Datenschutzerklärung"
+            url={process.env.EXPO_PUBLIC_PRIVACY_URL}
+          />{" "}
+          gelesen.
+        </Text>
+      </Pressable>
+      <FieldError message={consentError} />
+      <BodyText muted>Zeitbrücke ist für Erwachsene (ab 18).</BodyText>
+      <View style={{ flex: 1, minHeight: spacing.lg }} />
+      <PrimaryButton
+        label={sending ? "Wird gesendet …" : "Weiter"}
+        onPress={handleContinue}
+        disabled={sending}
+      />
+    </ScreenContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  consentRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
+    minHeight: touchTarget.minHeight,
+  },
+  checkbox: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.xs,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkmark: {
+    color: colors.onPrimary,
+    fontSize: fontSize.body,
+    fontWeight: "700",
+  },
+  consentText: {
+    flex: 1,
+    fontSize: fontSize.body,
+    lineHeight: fontSize.body * 1.5,
+    color: colors.text,
+  },
+  link: {
+    color: colors.primary,
+    fontWeight: "700",
+    textDecorationLine: "underline",
+  },
+});

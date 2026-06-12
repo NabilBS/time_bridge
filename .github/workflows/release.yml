@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  release-hinweis:
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manuelle EAS-Schritte ausgeben
+        run: |
+          echo "Typecheck grün für ${GITHUB_REF_NAME}."
+          echo ""
+          echo "Builds stößt das Team bewusst manuell an (kein Auto-Submit im Piloten):"
+          echo ""
+          echo "  cd apps/mobile"
+          echo "  # Closed Beta (TestFlight / Internal Track):"
+          echo "  eas build --profile preview --platform all"
+          echo "  # Store-Release:"
+          echo "  eas build --profile production --platform all"
+          echo "  eas submit --platform ios"
+          echo "  eas submit --platform android"
+          echo ""
+          echo "Checkliste vor Einreichung: docs/store-release.md"
+          echo "Secrets (Supabase-URL/Key, Sentry-DSN) liegen als EAS-Secrets, nicht im Repo."

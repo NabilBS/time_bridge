@@ -1,0 +1,9 @@
+{
+  "name": "zeitbruecke",
+  "private": true,
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "mobile": "pnpm --filter @zeitbruecke/mobile start"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
