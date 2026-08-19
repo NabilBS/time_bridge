@@ -26,7 +26,7 @@ import {
   type PartnerLocationItem,
 } from "@/lib/meetings";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 function defaultDate(): Date {
   const date = new Date();
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   note: {
     backgroundColor: colors.primarySoft,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
     marginTop: spacing.sm,
   },
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   locationName: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   locationMeta: {
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   whenValue: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   whenButtons: {

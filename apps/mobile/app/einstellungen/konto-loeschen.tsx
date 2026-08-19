@@ -16,7 +16,7 @@ import {
 import { deletePushToken } from "@/lib/notifications";
 import { useOnboarding } from "@/lib/onboarding";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 const CONFIRM_WORD = "LÖSCHEN";
 
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   warningBox: {
     backgroundColor: colors.errorSoft,

@@ -20,7 +20,7 @@ import {
   SURVEY_OFFLINE_MESSAGE,
   type SurveyAnswer,
 } from "@/lib/surveys";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 const SCALE_ANCHORS = ["stimme nicht zu", "", "teils-teils", "", "stimme voll zu"];
 
@@ -161,7 +161,7 @@ export default function Survey() {
 const styles = StyleSheet.create({
   question: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
     marginTop: spacing.sm,
   },
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   scoreLabel: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   scoreLabelSelected: {

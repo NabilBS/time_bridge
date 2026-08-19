@@ -9,7 +9,7 @@ import { BodyText, ScreenContainer, SecondaryButton, Title } from "@/components/
 import { deletePushToken } from "@/lib/notifications";
 import { useOnboarding } from "@/lib/onboarding";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, opacity, radius, spacing, touchTarget } from "@/lib/theme";
 
 const LEGAL_LINKS = [
   { label: "Datenschutzerklärung", url: process.env.EXPO_PUBLIC_PRIVACY_URL },
@@ -30,7 +30,7 @@ function NavRow({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.navRow, pressed && { opacity: 0.8 }]}
+      style={({ pressed }) => [styles.navRow, pressed && { opacity: opacity.pressed }]}
     >
       <Text style={[styles.navLabel, danger && { color: colors.error }]}>{label}</Text>
       <Text style={styles.chevron}>›</Text>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   card: {
     backgroundColor: colors.surface,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
     marginTop: spacing.sm,
   },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.text,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   chevron: {
     fontSize: fontSize.title,

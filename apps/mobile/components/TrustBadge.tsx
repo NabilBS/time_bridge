@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fontSize, radius, spacing } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing } from "@/lib/theme";
 
 export function TrustBadge({ level }: { level: number }) {
   return (
@@ -14,13 +14,13 @@ const styles = StyleSheet.create({
   badge: {
     alignSelf: "flex-start",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg,
+    borderRadius: radius.pill,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
   },
   text: {
     fontSize: fontSize.body,
-    fontWeight: "700",
-    color: colors.primary,
+    fontWeight: fontWeight.bold,
+    color: colors.primaryStrong,
   },
 });

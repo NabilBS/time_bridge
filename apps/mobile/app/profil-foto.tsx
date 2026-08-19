@@ -22,7 +22,15 @@ import {
   type PhotoState,
 } from "@/lib/photos";
 import { isDemo } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  fontWeight,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export default function ProfilePhoto() {
   const router = useRouter();
@@ -108,7 +116,7 @@ export default function ProfilePhoto() {
         <Avatar
           name={displayName}
           photoPath={photo?.pendingUri ?? photo?.photoPath}
-          size={112}
+          size={avatarSize.xl}
           pending={status === "submitted"}
         />
         {status === "submitted" ? (
@@ -171,7 +179,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   avatarRow: {
     alignItems: "center",

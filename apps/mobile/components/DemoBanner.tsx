@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { isDemo } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing } from "@/lib/theme";
 
 export function DemoBanner() {
   if (!isDemo) return null;
@@ -14,15 +14,15 @@ export function DemoBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: colors.demoBanner,
+    backgroundColor: colors.warningSoft,
     borderRadius: radius.sm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
   text: {
     fontSize: fontSize.body,
-    color: colors.demoBannerText,
+    color: colors.warning,
     textAlign: "center",
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
 });

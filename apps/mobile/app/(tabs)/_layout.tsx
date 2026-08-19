@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
 
-import { colors, fontSize } from "@/lib/theme";
+import { colors, fontSize, fontWeight, tabBar } from "@/lib/theme";
 
 function tabIcon(symbol: string) {
   return function TabIcon({ color }: { color: string }) {
@@ -16,8 +16,12 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 13, fontWeight: "600" },
-        tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6 },
+        tabBarLabelStyle: { fontSize: fontSize.caption, fontWeight: fontWeight.semibold },
+        tabBarStyle: {
+          height: tabBar.height,
+          paddingBottom: tabBar.paddingBottom,
+          paddingTop: tabBar.paddingTop,
+        },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Entdecken", tabBarIcon: tabIcon("☀") }} />

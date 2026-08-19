@@ -14,7 +14,7 @@ import {
   SecondaryButton,
   Title,
 } from "@/components/ui";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 import {
   ALLOWED_MIME_TYPES,
   submitVerification,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   fileBox: {
     backgroundColor: colors.surface,
@@ -179,6 +179,6 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: fontSize.body,
     color: colors.text,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
 });

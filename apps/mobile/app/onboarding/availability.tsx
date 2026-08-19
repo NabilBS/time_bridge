@@ -11,7 +11,7 @@ import {
   useOnboarding,
   type AvailabilitySelection,
 } from "@/lib/onboarding";
-import { colors, fontSize, spacing } from "@/lib/theme";
+import { colors, fontSize, fontWeight, spacing } from "@/lib/theme";
 
 export default function Availability() {
   const router = useRouter();
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   slotRow: {

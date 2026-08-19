@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, fontSize, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, spacing, touchTarget } from "@/lib/theme";
 
 export function ProgressHeader({ current, total }: { current: number; total: number }) {
   const router = useRouter();
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   progress: {
     fontSize: fontSize.body,

@@ -20,7 +20,7 @@ import {
   withdrawRequest,
   type RequestItem,
 } from "@/lib/matching";
-import { colors, fontSize, radius, spacing } from "@/lib/theme";
+import { avatarSize, colors, fontSize, fontWeight, radius, spacing } from "@/lib/theme";
 
 const SENT_STATUS_TEXTS: Record<string, string> = {
   pending: "Wartet auf Antwort",
@@ -95,7 +95,11 @@ export default function Requests() {
         received.map((request) => (
           <View key={request.id} style={styles.card}>
             <View style={styles.cardHeader}>
-              <Avatar name={request.otherName} photoPath={request.otherPhotoPath} size={48} />
+              <Avatar
+                name={request.otherName}
+                photoPath={request.otherPhotoPath}
+                size={avatarSize.sm}
+              />
               <Text style={styles.cardName}>{request.otherName}</Text>
             </View>
             {request.message ? <BodyText>„{request.message}"</BodyText> : null}
@@ -127,7 +131,11 @@ export default function Requests() {
         sent.map((request) => (
           <View key={request.id} style={styles.card}>
             <View style={styles.cardHeader}>
-              <Avatar name={request.otherName} photoPath={request.otherPhotoPath} size={48} />
+              <Avatar
+                name={request.otherName}
+                photoPath={request.otherPhotoPath}
+                size={avatarSize.sm}
+              />
               <Text style={styles.cardName}>{request.otherName}</Text>
             </View>
             <BodyText muted>{SENT_STATUS_TEXTS[request.status] ?? request.status}</BodyText>
@@ -147,7 +155,7 @@ export default function Requests() {
 const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontSize.subtitle,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
     marginTop: spacing.sm,
   },
@@ -166,7 +174,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
 });
