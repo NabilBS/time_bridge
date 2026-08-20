@@ -20,7 +20,7 @@ import {
   Title,
 } from "@/components/ui";
 import { stepProgress, useOnboarding } from "@/lib/onboarding";
-import { colors, fontSize, radius, spacing } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing } from "@/lib/theme";
 
 const AGES = Array.from(
   { length: CHILD_AGE_MAX - CHILD_AGE_MIN + 1 },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   ageLabel: {
     fontSize: fontSize.body,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   ageRow: {

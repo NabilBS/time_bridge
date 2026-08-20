@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { FieldError } from "@/components/ui";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 const ITEM_HEIGHT = touchTarget.minHeight;
 const VISIBLE_HEIGHT = ITEM_HEIGHT * 5;
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: fontSize.body,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   listWrapper: {
@@ -105,6 +105,6 @@ const styles = StyleSheet.create({
   },
   rowLabelSelected: {
     color: colors.onPrimary,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
   },
 });

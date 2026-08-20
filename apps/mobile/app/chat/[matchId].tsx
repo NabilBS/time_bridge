@@ -31,7 +31,16 @@ import {
 } from "@/lib/meetings";
 import { setActiveChat } from "@/lib/notifications";
 import { shouldShowSurvey } from "@/lib/surveys";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  colors,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  opacity,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export default function Chat() {
   const router = useRouter();
@@ -167,7 +176,7 @@ export default function Chat() {
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push(`/treffen/planen/${matchId}`)}
-            style={({ pressed }) => [styles.planButton, pressed && { opacity: 0.85 }]}
+            style={({ pressed }) => [styles.planButton, pressed && { opacity: opacity.pressed }]}
           >
             <Text style={styles.planButtonLabel}>+ Treffen planen</Text>
           </Pressable>
@@ -282,7 +291,7 @@ export default function Chat() {
                 style={[
                   styles.bubble,
                   own ? styles.bubbleOwn : styles.bubbleOther,
-                  pending && { opacity: 0.6 },
+                  pending && { opacity: opacity.pending },
                 ]}
               >
                 <Text style={[styles.bubbleText, own && styles.bubbleTextOwn]}>{message.body}</Text>
@@ -296,7 +305,7 @@ export default function Chat() {
         <View style={styles.inputRow}>
           <TextInput
             accessibilityLabel="Nachricht schreiben"
-            style={[styles.input, !partnerActive && { opacity: 0.5 }]}
+            style={[styles.input, !partnerActive && { opacity: opacity.disabled }]}
             value={draft}
             onChangeText={setDraft}
             placeholder={partnerActive ? "Ihre Nachricht …" : "Dieses Profil ist nicht mehr aktiv."}
@@ -310,7 +319,10 @@ export default function Chat() {
             accessibilityLabel="Senden"
             onPress={handleSend}
             disabled={!partnerActive || !draft.trim()}
-            style={[styles.sendButton, (!partnerActive || !draft.trim()) && { opacity: 0.4 }]}
+            style={[
+              styles.sendButton,
+              (!partnerActive || !draft.trim()) && { opacity: opacity.disabled },
+            ]}
           >
             <Text style={styles.sendLabel}>Senden</Text>
           </Pressable>
@@ -340,12 +352,12 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.title,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   headerName: {
     flex: 1,
     fontSize: fontSize.subtitle,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   reportButton: {
@@ -356,7 +368,7 @@ const styles = StyleSheet.create({
   reportLabel: {
     fontSize: fontSize.body,
     color: colors.error,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   inactiveBanner: {
     backgroundColor: colors.errorSoft,
@@ -369,7 +381,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     color: colors.error,
     textAlign: "center",
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   meetingsHeader: {
     gap: spacing.sm,
@@ -395,7 +407,7 @@ const styles = StyleSheet.create({
   },
   planButtonLabel: {
     fontSize: fontSize.body,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.primary,
   },
   meetingCard: {
@@ -408,7 +420,7 @@ const styles = StyleSheet.create({
   },
   meetingWhen: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   meetingWhere: {
@@ -422,7 +434,7 @@ const styles = StyleSheet.create({
   meetingDone: {
     fontSize: fontSize.body,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   meetingActions: {
     flexDirection: "row",
@@ -435,7 +447,7 @@ const styles = StyleSheet.create({
   },
   meetingActionLabel: {
     fontSize: fontSize.body,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.primary,
   },
   messageList: {
@@ -460,7 +472,7 @@ const styles = StyleSheet.create({
   },
   bubbleText: {
     fontSize: fontSize.body,
-    lineHeight: fontSize.body * 1.4,
+    lineHeight: fontSize.body * lineHeight.normal,
     color: colors.text,
   },
   bubbleTextOwn: {
@@ -499,7 +511,7 @@ const styles = StyleSheet.create({
   },
   sendLabel: {
     fontSize: fontSize.body,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.onPrimary,
   },
 });

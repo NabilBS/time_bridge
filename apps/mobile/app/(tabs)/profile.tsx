@@ -21,7 +21,16 @@ import { BodyText, PrimaryButton, ScreenContainer, Title } from "@/components/ui
 import { useOnboarding } from "@/lib/onboarding";
 import { loadPhotoState, type PhotoState } from "@/lib/photos";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  fontWeight,
+  opacity,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 import {
   computeTrustLevel,
   latestByType,
@@ -229,7 +238,7 @@ export default function Profile() {
         <Avatar
           name={profile.displayName}
           photoPath={profile.photo?.pendingUri ?? profile.photo?.photoPath}
-          size={88}
+          size={avatarSize.lg}
           pending={profile.photo?.submissionStatus === "submitted"}
         />
         <Title>{profile.displayName}</Title>
@@ -252,7 +261,10 @@ export default function Profile() {
                 key={type}
                 accessibilityRole="button"
                 onPress={() => router.push(`/verifizierung/${type}`)}
-                style={({ pressed }) => [styles.verificationRow, pressed && { opacity: 0.8 }]}
+                style={({ pressed }) => [
+                  styles.verificationRow,
+                  pressed && { opacity: opacity.pressed },
+                ]}
               >
                 <View style={{ flex: 1, gap: spacing.xs }}>
                   <Text style={styles.rowValue}>{VERIFICATION_TYPE_LABELS[type]}</Text>
@@ -329,14 +341,14 @@ const styles = StyleSheet.create({
   trustBadge: {
     alignSelf: "flex-start",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg,
+    borderRadius: radius.pill,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
   trustText: {
     fontSize: fontSize.body,
-    fontWeight: "700",
-    color: colors.primary,
+    fontWeight: fontWeight.bold,
+    color: colors.primaryStrong,
   },
   card: {
     backgroundColor: colors.surface,
@@ -348,7 +360,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize.subtitle,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   verificationRow: {
@@ -367,15 +379,15 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.text,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   chevron: {
     fontSize: fontSize.title,
     color: colors.textMuted,
   },
   statusApproved: {
-    color: colors.primary,
-    fontWeight: "600",
+    color: colors.success,
+    fontWeight: fontWeight.semibold,
   },
   row: {
     gap: spacing.xs,
@@ -387,6 +399,6 @@ const styles = StyleSheet.create({
   rowValue: {
     fontSize: fontSize.bodyLarge,
     color: colors.text,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
 });

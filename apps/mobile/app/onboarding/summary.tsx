@@ -16,7 +16,7 @@ import { ProgressHeader } from "@/components/ProgressHeader";
 import { BodyText, FieldError, PrimaryButton, ScreenContainer, Title } from "@/components/ui";
 import { stepProgress, useOnboarding, type OnboardingState } from "@/lib/onboarding";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing } from "@/lib/theme";
 
 const OFFLINE_MESSAGE =
   "Keine Verbindung – Ihre Eingaben sind gespeichert, bitte versuchen Sie es gleich erneut.";
@@ -209,6 +209,6 @@ const styles = StyleSheet.create({
   rowValue: {
     fontSize: fontSize.bodyLarge,
     color: colors.text,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
 });

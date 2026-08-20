@@ -16,7 +16,7 @@ import {
   saveNotificationPrefs,
   type PermissionStatus,
 } from "@/lib/notifications";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function NotificationSettings() {
   const router = useRouter();
@@ -104,16 +104,16 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   permissionHint: {
-    backgroundColor: colors.demoBanner,
+    backgroundColor: colors.warningSoft,
     borderRadius: radius.md,
     padding: spacing.md,
   },
   permissionText: {
     fontSize: fontSize.body,
-    color: colors.demoBannerText,
+    color: colors.warning,
   },
   row: {
     flexDirection: "row",
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     minHeight: touchTarget.minHeight,
     gap: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.divider,
     paddingVertical: spacing.sm,
   },
   rowLabel: {

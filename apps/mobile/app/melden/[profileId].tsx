@@ -15,7 +15,7 @@ import {
   Title,
 } from "@/components/ui";
 import { OFFLINE_MESSAGE, reportProfile } from "@/lib/matching";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 
 export default function Report() {
   const router = useRouter();
@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
 });

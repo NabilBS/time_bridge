@@ -2,7 +2,15 @@ import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import {
   VERIFICATION_TYPE_LABELS,
   VerificationType,
@@ -24,7 +32,7 @@ import {
   type IdentSessionInfo,
 } from "@/lib/ident";
 import { isDemo } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import { colors, fontSize, fontWeight, radius, spacing, touchTarget } from "@/lib/theme";
 import {
   latestByType,
   loadVerifications,
@@ -45,9 +53,20 @@ const STATUS_TEXTS: Record<VerificationStatus, string> = {
 
 function StatusBox({ entry }: { entry: VerificationEntry | undefined }) {
   if (!entry) return null;
+  // Jeder Status hat eine eigene Farbfamilie – nicht nur „grün oder grau".
+  const variants: Record<
+    VerificationStatus,
+    { box: StyleProp<ViewStyle>; text: StyleProp<TextStyle> }
+  > = {
+    submitted: { box: styles.statusBoxPending, text: styles.statusTextPending },
+    approved: { box: styles.statusBoxApproved, text: styles.statusTextApproved },
+    rejected: { box: styles.statusBoxRejected, text: styles.statusTextRejected },
+    expired: { box: styles.statusBoxPending, text: styles.statusTextPending },
+  };
+  const variant = variants[entry.status];
   return (
-    <View style={[styles.statusBox, entry.status === "approved" && styles.statusBoxApproved]}>
-      <Text style={styles.statusText}>{STATUS_TEXTS[entry.status]}</Text>
+    <View style={[styles.statusBox, variant.box]}>
+      <Text style={[styles.statusText, variant.text]}>{STATUS_TEXTS[entry.status]}</Text>
       {entry.status === "approved" && entry.valid_until ? (
         <Text style={styles.statusMeta}>Gültig bis {entry.valid_until}</Text>
       ) : null}
@@ -289,7 +308,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   statusBox: {
     backgroundColor: colors.surface,
@@ -300,13 +319,30 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   statusBoxApproved: {
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primary,
+    backgroundColor: colors.successSoft,
+    borderColor: colors.success,
+  },
+  statusBoxPending: {
+    backgroundColor: colors.warningSoft,
+    borderColor: colors.warning,
+  },
+  statusBoxRejected: {
+    backgroundColor: colors.errorSoft,
+    borderColor: colors.error,
   },
   statusText: {
     fontSize: fontSize.body,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
+  },
+  statusTextApproved: {
+    color: colors.success,
+  },
+  statusTextPending: {
+    color: colors.warning,
+  },
+  statusTextRejected: {
+    color: colors.error,
   },
   statusMeta: {
     fontSize: fontSize.body,

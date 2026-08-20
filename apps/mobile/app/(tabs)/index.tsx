@@ -20,7 +20,16 @@ import {
 } from "@/lib/matching";
 import { useOnboarding } from "@/lib/onboarding";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  fontWeight,
+  opacity,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export default function Discover() {
   const router = useRouter();
@@ -157,10 +166,14 @@ export default function Discover() {
           key={profile.id}
           accessibilityRole="button"
           onPress={() => router.push(`/profil-detail/${profile.id}`)}
-          style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.card, pressed && { opacity: opacity.pressed }]}
         >
           <View style={styles.cardHeader}>
-            <Avatar name={profile.display_name} photoPath={profile.photo_path} size={56} />
+            <Avatar
+              name={profile.display_name}
+              photoPath={profile.photo_path}
+              size={avatarSize.md}
+            />
             <View style={{ flex: 1 }}>
               <Text style={styles.cardName}>{profile.display_name}</Text>
               <Text style={styles.cardMeta}>{profile.district}</Text>
@@ -189,7 +202,7 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: fontSize.body,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   chipWrap: {
@@ -213,7 +226,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: fontSize.subtitle,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   cardMeta: {

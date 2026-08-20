@@ -17,7 +17,7 @@ import {
   OFFLINE_MESSAGE,
   submitReview,
 } from "@/lib/meetings";
-import { colors, fontSize, spacing, touchTarget } from "@/lib/theme";
+import { colors, size, spacing, touchTarget } from "@/lib/theme";
 
 function StarRating({
   value,
@@ -36,7 +36,9 @@ function StarRating({
           onPress={() => onChange(star)}
           style={styles.star}
         >
-          <Text style={[styles.starGlyph, star <= value && styles.starGlyphActive]}>★</Text>
+          <Text style={[styles.starGlyph, star <= value && styles.starGlyphActive]}>
+            {star <= value ? "★" : "☆"}
+          </Text>
         </Pressable>
       ))}
     </View>
@@ -127,10 +129,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   starGlyph: {
-    fontSize: 44,
-    color: colors.border,
+    fontSize: size.star,
+    color: colors.ratingEmpty,
   },
   starGlyphActive: {
-    color: "#C9A227",
+    color: colors.rating,
   },
 });

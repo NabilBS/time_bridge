@@ -6,7 +6,16 @@ import { Avatar } from "@/components/Avatar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { BodyText, ScreenContainer, Title } from "@/components/ui";
 import { loadMatches, OFFLINE_MESSAGE, type MatchItem } from "@/lib/matching";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  fontWeight,
+  opacity,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export default function Chats() {
   const router = useRouter();
@@ -54,10 +63,14 @@ export default function Chats() {
           key={match.id}
           accessibilityRole="button"
           onPress={() => router.push(`/chat/${match.id}`)}
-          style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.card, pressed && { opacity: opacity.pressed }]}
         >
           <View style={styles.cardHeader}>
-            <Avatar name={match.partnerName} photoPath={match.partnerPhotoPath} size={56} />
+            <Avatar
+              name={match.partnerName}
+              photoPath={match.partnerPhotoPath}
+              size={avatarSize.md}
+            />
             <Text style={styles.cardName}>{match.partnerName}</Text>
           </View>
           <Text style={styles.cardPreview} numberOfLines={1}>
@@ -89,7 +102,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   cardPreview: {

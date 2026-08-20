@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 
 import { supabase } from "@/lib/supabase";
-import { colors, fontSize } from "@/lib/theme";
+import { avatarSize, colors, fontWeight } from "@/lib/theme";
 
 /** Initialen aus dem Anzeigenamen, z. B. „Helga R." → „HR". */
 function initials(name: string): string {
@@ -26,7 +26,7 @@ export function resolveAvatarUri(photoPath: string | null | undefined): string |
 export function Avatar({
   name,
   photoPath,
-  size = 56,
+  size = avatarSize.md,
   pending = false,
 }: {
   name: string;
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   initials: {
     color: colors.onPrimary,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     // Basis-Schriftgröße wird über size skaliert; nie unter Tokens-Minimum nötig,
     // da Initialen dekorativ sind (Name steht immer daneben).
     lineHeight: undefined,
@@ -74,6 +74,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    backgroundColor: "rgba(255, 253, 248, 0.55)",
+    backgroundColor: colors.overlayVeil,
   },
 });

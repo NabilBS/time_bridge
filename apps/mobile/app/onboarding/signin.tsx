@@ -17,7 +17,16 @@ import {
 } from "@/components/ui";
 import { stepProgress, useOnboarding } from "@/lib/onboarding";
 import { isDemo, supabase } from "@/lib/supabase";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  colors,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  radius,
+  size,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 const EmailSchema = z.string().trim().email();
 
@@ -144,8 +153,8 @@ const styles = StyleSheet.create({
     minHeight: touchTarget.minHeight,
   },
   checkbox: {
-    width: 28,
-    height: 28,
+    width: size.checkbox,
+    height: size.checkbox,
     borderRadius: radius.sm,
     borderWidth: 2,
     borderColor: colors.borderStrong,
@@ -161,17 +170,17 @@ const styles = StyleSheet.create({
   checkmark: {
     color: colors.onPrimary,
     fontSize: fontSize.body,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
   },
   consentText: {
     flex: 1,
     fontSize: fontSize.body,
-    lineHeight: fontSize.body * 1.5,
+    lineHeight: fontSize.body * lineHeight.normal,
     color: colors.text,
   },
   link: {
     color: colors.primary,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     textDecorationLine: "underline",
   },
 });

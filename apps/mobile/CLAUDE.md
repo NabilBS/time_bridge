@@ -5,7 +5,9 @@ Expo-App (expo-router, TypeScript strict). Einstieg: `pnpm start` in diesem Verz
 ## Struktur
 
 - `app/` – Routen (expo-router). Onboarding unter `app/onboarding/`, Tabs unter `app/(tabs)/`, Auth-Callback unter `app/auth/callback.tsx`, Verifizierung unter `app/verifizierung/` (Detail `[type].tsx`, Upload `upload/[type].tsx`).
-- `lib/theme.ts` – **einzige** Quelle für Farben, Abstände, Schriftgrößen, Radien. Keine hartkodierten Werte in Screens.
+- `lib/theme.ts` – **einzige** Quelle für Design-Werte: `colors`, `spacing`, `fontSize`, `lineHeight`, `fontWeight`, `radius`, `touchTarget`, `opacity`, `size`, `avatarSize`, `tabBar`. Keine hartkodierten Werte in Screens – auch keine Schriftschnitte, Deckkräfte oder Pixelmaße.
+  - Farben sind semantisch benannt: Marke (`primary`/`primaryStrong`/`primarySoft`), Status (`success`, `warning`, `error` je mit `*Soft`-Fläche), Linien (`divider` dekorativ, `border` für Bedienelemente, `borderStrong` für Eingaben), Bewertung (`rating`/`ratingEmpty`). Status nie allein über Farbe anzeigen – immer zusätzlich Text oder Form (z. B. ★ vs. ☆).
+  - Kontrast-Zusage (Zielgruppe 60+): textführende Paare ≥ 7:1 (WCAG AAA), Umrisse und bedeutungstragende Grafiken ≥ 3:1. Neue Farbwerte vorher nachrechnen und den Wert im Kommentar notieren.
 - `lib/supabase.ts` – Supabase-Client (AsyncStorage als `auth.storage`) und `isDemo`-Flag.
 - `lib/onboarding.ts` – Onboarding-State als Context + Reducer, persistiert in AsyncStorage (App-Kill-sicher).
 - `lib/verifications.ts` – Nachweise laden/einreichen (real + Demo), Datei-Validierung (10 MB, JPG/PNG/HEIC/PDF), Pfad-Konvention `verificationDocPath` aus `@zeitbruecke/shared`. `trust_level` schreibt nie die App – das macht der DB-Trigger.

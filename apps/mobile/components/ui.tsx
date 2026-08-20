@@ -11,7 +11,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  colors,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  opacity,
+  radius,
+  size,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export function ScreenContainer({
   children,
@@ -242,12 +252,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSize.title,
-    fontWeight: "700",
+    lineHeight: fontSize.title * lineHeight.tight,
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   body: {
     fontSize: fontSize.body,
-    lineHeight: fontSize.body * 1.5,
+    lineHeight: fontSize.body * lineHeight.normal,
     color: colors.text,
   },
   bodyMuted: {
@@ -258,7 +269,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: fontSize.body,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   input: {
@@ -272,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   inputMultiline: {
-    minHeight: 140,
+    minHeight: size.multilineInput,
     paddingTop: spacing.md,
     textAlignVertical: "top",
   },
@@ -299,7 +310,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonLabel: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.onPrimary,
   },
   secondaryButton: {
@@ -313,18 +324,18 @@ const styles = StyleSheet.create({
   },
   secondaryButtonLabel: {
     fontSize: fontSize.bodyLarge,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.primary,
   },
   buttonPressed: {
-    opacity: 0.85,
+    opacity: opacity.pressed,
   },
   buttonDisabled: {
-    opacity: 0.4,
+    opacity: opacity.disabled,
   },
   chip: {
     minHeight: touchTarget.minHeight,
-    borderRadius: radius.lg,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
@@ -341,7 +352,7 @@ const styles = StyleSheet.create({
   },
   chipLabelSelected: {
     color: colors.onPrimary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   selectCard: {
     borderWidth: 2,
@@ -358,12 +369,13 @@ const styles = StyleSheet.create({
   },
   selectCardTitle: {
     fontSize: fontSize.subtitle,
-    fontWeight: "700",
+    lineHeight: fontSize.subtitle * lineHeight.tight,
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   selectCardSubtitle: {
     fontSize: fontSize.body,
-    lineHeight: fontSize.body * 1.4,
+    lineHeight: fontSize.body * lineHeight.normal,
     color: colors.textMuted,
   },
   stepperRow: {
@@ -384,11 +396,11 @@ const styles = StyleSheet.create({
   stepperButtonLabel: {
     fontSize: fontSize.title,
     color: colors.primary,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
   },
   stepperValue: {
     fontSize: fontSize.title,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
     minWidth: 48,
     textAlign: "center",

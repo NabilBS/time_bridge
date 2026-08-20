@@ -23,7 +23,15 @@ import {
   type DiscoverProfile,
 } from "@/lib/matching";
 import { loadReviewStats, type ReviewStats } from "@/lib/meetings";
-import { colors, fontSize, radius, spacing, touchTarget } from "@/lib/theme";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  fontWeight,
+  radius,
+  spacing,
+  touchTarget,
+} from "@/lib/theme";
 
 export default function ProfileDetail() {
   const router = useRouter();
@@ -106,7 +114,7 @@ export default function ProfileDetail() {
       <BackRow onPress={() => router.back()} />
       <DemoBanner />
       <View style={styles.headerRow}>
-        <Avatar name={profile.display_name} photoPath={profile.photo_path} size={88} />
+        <Avatar name={profile.display_name} photoPath={profile.photo_path} size={avatarSize.lg} />
         <Title>{profile.display_name}</Title>
       </View>
       <TrustBadge level={profile.trust_level} />
@@ -204,7 +212,7 @@ const styles = StyleSheet.create({
   backLabel: {
     fontSize: fontSize.bodyLarge,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   headerRow: {
     flexDirection: "row",
@@ -220,7 +228,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize.body,
-    fontWeight: "700",
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   sentBox: {
